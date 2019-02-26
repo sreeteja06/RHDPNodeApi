@@ -30,6 +30,19 @@ var junctionPointSchema = new mongoose.Schema({
   ]
 });
 
+junctionPointSchema.methods.removeUserAccess = function(userId){
+  let junctionPoint = this;
+  return junctionPoint.update({
+    $pull: {
+      _accessedByUsers: {
+        userid: {
+          _id: userId
+        }
+      }
+    }
+  })
+}
+
 junctionPointSchema.index({
   longitude: 1,
   latitude:1,

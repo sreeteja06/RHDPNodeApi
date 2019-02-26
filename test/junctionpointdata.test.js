@@ -7,23 +7,23 @@ const { ObjectID } = require("mongodb");
 
 const userId = new ObjectID();
 
-// var junctionPoint = new JunctionPoint({
-//   longitude: "43.31",
-//   latitude: "24211.343",
-//   area: "secundrabad",
-//   city: "hyderabad",
-//   junctionName: "gachi",
-//   _accessedByUsers: [ObjectID("5c74ebb4c354c24ec889034c")]
-// });
+var junctionPoint = new JunctionPoint({
+  longitude: "43.31",
+  latitude: "24211.343",
+  area: "secundrabad",
+  city: "hyderabad",
+  junctionName: "gachi",
+  _accessedByUsers: [ObjectID("5c74ebb4c354c24ec889034c")]
+});
 
-// junctionPoint
-//   .save()
-//   .then(doc => {
-//     console.log(doc);
-//   })
-//   .catch(e => {
-//     console.log(e);
-//   });
+junctionPoint
+  .save()
+  .then(doc => {
+    console.log(doc);
+  })
+  .catch(e => {
+    console.log(e);
+  });
 
 JunctionPoint.find({
   _accessedByUsers: { _id: "5c74f450205159546c6a8ff1" }
@@ -34,3 +34,9 @@ JunctionPoint.find({
   .catch(e => {
     console.log(e);
   });
+
+JunctionPoint.remove({ "_id": ObjectID("5c75017953e42937e0d8ef27") }).then((result) => {
+  res.send(result);
+}).catch((e) => {
+  res.send(e);
+})

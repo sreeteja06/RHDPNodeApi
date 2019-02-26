@@ -98,6 +98,29 @@ app.delete('/users/me/logout', authenticate, (req, res)=>{            //removes 
   })
 })
 
+app.delete('/removeJunctionPoint', authenticate, (req, res)=>{             //removes the junctionpoint given the locationid
+  // if(req.user._id === admin._id){
+  // if only admin can remove the location
+  // }
+  JunctionPoint.remove({"_id": ObjectID(req.query.locationID.toString())}).then((result)=>{
+    res.send(result);
+  }).catch((e)=>{
+    res.send(e);
+  })
+});
+
+app.delete('/removeJunctionPointAccess', authenticate, (req, res)=>{
+  if(req.user._id === req.body.userID){           //removes only if the user tries to remove his own access can add //req.user._id===admin._id
+    JunctionPoint.findOne({"_id": ObjectID(req.query.userID.toString())}).then((junctionPoint)=>{
+      junctionPoint.removeUserAccess(req.query.userID).then(()=>{
+        res.status(200).send();
+      },()=>{
+        res.status(400).send();
+      })
+    })
+  }
+})
+
 app.listen(port, () => {
   console.log(`Started up at port ${port}`);
 });
