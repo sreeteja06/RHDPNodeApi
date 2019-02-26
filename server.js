@@ -15,7 +15,7 @@ let app = express();
 const port = process.env.PORT;
 app.use(bodyParser.json());
 
-app.post("/newJunctionPoint", authenticate, (req, res) => {
+app.post("/newJunctionPoint", authenticate, (req, res) => {           //to update a new location in the database
   let junctionPoint = new JunctionPoint({
     longitude: req.body.longitude,
     latitude: req.body.latitude,
@@ -31,7 +31,7 @@ app.post("/newJunctionPoint", authenticate, (req, res) => {
   })
 });
 
-app.get("/getLocations", authenticate, (req,res)=>{
+app.get("/getLocations", authenticate, (req,res)=>{                 //to get the locations based on who is logged on
     JunctionPoint.find({
       _accessedByUsers: { _id: req.user._id.toString() }
     })
@@ -43,12 +43,11 @@ app.get("/getLocations", authenticate, (req,res)=>{
       });
 })
 
-app.get("/users/me", authenticate, (req, res) => {
-  //example for authentication check
+app.get("/users/me", authenticate, (req, res) => {                  //example for authentication check
   res.send(req.user);
 });
 
-app.post("/users/login", (req, res) => {
+app.post("/users/login", (req, res) => {                            //login the user, given the login credentials in the body
   var body = _.pick(req.body, ["email", "password"]);
   User.findByCredentials(body.email, body.password)
     .then(user => {
@@ -61,7 +60,7 @@ app.post("/users/login", (req, res) => {
     });
 });
 
-app.post("/users", (req, res) => {
+app.post("/users", (req, res) => {                                  //to create a new user given, password and email
   let password;
   bcrypt.genSalt(10, (err, salt) => {
     if (err) {
@@ -90,6 +89,14 @@ app.post("/users", (req, res) => {
     });
   });
 });
+
+app.delete('/users/me/logout', authenticate, (req, res)=>{            //removes the current token, i.e. logout the user
+  req.user.removeToken(req.token).then(()=>{
+    res.status(200).send();
+  },()=>{
+    res.status(400).send();
+  })
+})
 
 app.listen(port, () => {
   console.log(`Started up at port ${port}`);
