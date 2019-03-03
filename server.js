@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const _ = require('lodash');
 const { ObjectID } = require('mongodb');
+const cors = require('cors');
 
 // eslint-disable-next-line no-unused-vars
 var { mongoose } = require('./db/mongoose');
@@ -13,6 +14,7 @@ let { authenticate } = require('./middleware/authenticate');
 let { JunctionPoint } = require('./models/junctionPoint');
 
 let app = express();
+app.use(cors());
 const port = process.env.PORT;
 app.use(bodyParser.json());
 
@@ -69,11 +71,11 @@ app.post('/users/login', (req, res) => {                            //login the 
 	User.findByCredentials(body.email, body.password)
 		.then(user => {
 			user.generateAuthToken().then(token => {
-				res.header('x-auth', token).send(user);
+				res.header('x-auth', token).send({user, token});
 			});
 		})
 		.catch(e => {
-			res.status(400).send(e);
+			res.status(401).send(e);
 		});
 });
 
@@ -90,7 +92,9 @@ app.post('/users', (req, res) => {                                  //to create 
 			password = hash;
 			var user = new User({
 				email: req.body.email,
-				password
+				password,
+				name: req.body.name,
+				phone: req.body.phone
 			});
 			user
 				.save()

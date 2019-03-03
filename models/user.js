@@ -21,6 +21,16 @@ var UserSchema = new mongoose.Schema({
 		require: true,
 		minlength: 6
 	},
+	name: {
+		type: String,
+		required: true,
+		trim: true,
+	},
+	phone: {
+		type: Number,
+		length: 10,
+		required: true
+	},
 	tokens: [{
 		access: {
 			type: String,
