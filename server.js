@@ -73,7 +73,7 @@ app.post('/users/login', (req, res) => {                            //login the 
 			user.generateAuthToken().then(token => {
 				res.append('Access-Control-Allow-Headers', 'x-auth, Content-Type');
 				res.append('Access-Control-Expose-Headers', 'x-auth, Content-Type');
-				res.header('x-auth', token).send({user});
+				res.header('x-auth', token).send({user, token});
 			});
 		})
 		.catch(e => {
