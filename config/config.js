@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 var env = process.env.NODE_ENV || 'development';
 // eslint-disable-next-line no-console
 console.log(process.env.NODE_ENV);
