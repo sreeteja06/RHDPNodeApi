@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const _ = require('lodash');
 const { ObjectID } = require('mongodb');
 const cors = require('cors');
+const { admin_id } = require('./h-adminid.json');
 
 // eslint-disable-next-line no-unused-vars
 var { mongoose } = require('./db/mongoose');
@@ -29,7 +30,7 @@ app.post('/newJunctionPoint', authenticate, (req, res) => {           //to updat
 		area: req.body.area,
 		city: req.body.city,
 		junctionName: req.body.junctionName,
-		_accessedByUsers: [{ _id: req.user._id }]
+		_accessedByUsers: [{ _id: req.user._id }, {_id: admin_id}]
 	});
 	junctionPoint.save().then((doc)=>{
 		res.send(doc);
@@ -51,7 +52,7 @@ app.get('/getLocations', authenticate, (req,res)=>{                 //to get the
 });
 
 app.post('/giveLocationAccess', authenticate, (req, res)=>{
-	if(req.user._id === 'admin._id'){                                 //only admin has the access to give the access
+	if(req.user._id.toString() === (admin_id.toString())){                                 //only admin has the access to give the access
 		JunctionPoint.updateOne({ _id: req.body.locationID.toString() }, {
 			'$push': { '_accessedByUsers': { '_id': ObjectID(req.body.addUserid.toString()) } }
 		}).then((response) => {
@@ -59,6 +60,9 @@ app.post('/giveLocationAccess', authenticate, (req, res)=>{
 		}).catch((e) => {
 			res.send(e);
 		});
+	}
+	else{
+		res.status(400).send({'err':'if statement not passed'});
 	}
 });
 
@@ -133,7 +137,7 @@ app.delete('/removeJunctionPoint', authenticate, (req, res)=>{             //rem
 });
 
 app.delete('/removeJunctionPointAccess', authenticate, (req, res)=>{
-	if(req.user._id === req.body.userID){           //removes only if the user tries to remove his own access can add //req.user._id===admin._id
+	if(req.user._id === req.body.userID || req.user._id === admin_id.toString()){           //removes only if the user tries to remove his own access can add //req.user._id===admin._id
 		JunctionPoint.findOne({'_id': ObjectID(req.query.userID.toString())}).then((junctionPoint)=>{
 			junctionPoint.removeUserAccess(req.query.userID).then(()=>{
 				res.status(200).send();
