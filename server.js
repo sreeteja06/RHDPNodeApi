@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const _ = require('lodash');
 const { ObjectID } = require('mongodb');
 const cors = require('cors');
-const { admin_id } = require('./h-adminid.json');
+// const { admin_id } = require('./h-adminid.json');
 
 // eslint-disable-next-line no-unused-vars
 var { mongoose } = require('./db/mongoose');
@@ -18,6 +18,7 @@ let app = express();
 app.use(cors());
 const port = process.env.PORT;
 app.use(bodyParser.json());
+const admin_id = process.env.admin_id;
 
 app.get('/',(req, res)=>{
 	res.send('welcome to the rhdp node api');
