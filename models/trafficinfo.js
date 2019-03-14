@@ -1,4 +1,4 @@
-const  mongoose = require('mongoose');
+const  mongoose = require("mongoose");
 
 let trafficInfoSchema = new mongoose.Schema({
 	trafficCongestion: {
@@ -41,6 +41,6 @@ let trafficInfoSchema = new mongoose.Schema({
 	}
 });
 
-let TrafficInfo = new mongoose.model('TrafficInfo', trafficInfoSchema);
+let TrafficInfo = new mongoose.model("TrafficInfo", trafficInfoSchema);
 
 module.exports = { TrafficInfo };

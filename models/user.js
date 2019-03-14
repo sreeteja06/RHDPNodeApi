@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const jwt = require('jsonwebtoken');
-const _ = require('lodash');
-const bcrypt = require('bcryptjs');
+const mongoose = require("mongoose");
+const validator = require("validator");
+const jwt = require("jsonwebtoken");
+const _ = require("lodash");
+const bcrypt = require("bcryptjs");
 
 var UserSchema = new mongoose.Schema({
 	email: {
@@ -13,7 +13,7 @@ var UserSchema = new mongoose.Schema({
 		unique: true,
 		validate: {
 			validator: validator.isEmail,
-			message: '{VALUE} is not a valid email'
+			message: "{VALUE} is not a valid email"
 		}
 	},
 	password: {
@@ -47,12 +47,12 @@ UserSchema.methods.toJSON = function() {
 	var user = this;
 	var userObject = user.toObject();
 
-	return _.pick(userObject, ['_id', 'email']);
+	return _.pick(userObject, ["_id", "email"]);
 };
 
 UserSchema.methods.generateAuthToken = function() {
 	var user = this;
-	var access = 'auth';
+	var access = "auth";
 	var token = jwt.sign({ _id: user._id.toHexString(), access }, process.env.JWT_SECRET).toString();
 
 	user.tokens.push({access, token});
@@ -83,9 +83,9 @@ UserSchema.statics.findByToken = function(token){
 		return Promise.reject(e);
 	}
 	return User.findOne({
-		'_id': decoded._id,
-		'tokens.token': token,
-		'tokens.access': 'auth'
+		"_id": decoded._id,
+		"tokens.token": token,
+		"tokens.access": "auth"
 	});
 };
 
@@ -109,6 +109,6 @@ UserSchema.statics.findByCredentials = function (email, password) {
 	});
 };
 
-var User = new mongoose.model( 'User', UserSchema );
+var User = new mongoose.model( "User", UserSchema );
 
 module.exports = { User };
