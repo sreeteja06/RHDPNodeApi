@@ -25,14 +25,14 @@ app.get("/", (req, res) => {
 	/newJunctionPoint - auth required<br/>
 	/getLocations - auth required<br/>
 	/giveLocationAccess - auth required - only the admin<br/>
-	/users/login - auth required<br/>
-	/users - to create a new user<br/>
-	/users/me/logout - auth required<br/>
+	/user/login - auth required<br/>
+	/user/signUp - to create a new user<br/>
+	/user/me/logout - auth required<br/>
 	/removeJunctionPoint - auth required - only the admin<br/>
 	/removeJunctionPointAccess - auth required - only the admin<br/>
-	/users/me/updateName - auth required <br/>
-	/users/me/updateNumber - auth required <br/>
-	/users/me/changePassword - auth required <br/>
+	/user/me/updateName - auth required <br/>
+	/user/me/updateNumber - auth required <br/>
+	/user/me/changePassword - auth required <br/>
 	`);
 });
 
@@ -91,12 +91,12 @@ app.post("/giveLocationAccess", authenticate, (req, res) => {
 	}
 });
 
-app.get("/users/me", authenticate, (req, res) => {
+app.get("/user/me", authenticate, (req, res) => {
 	//example for authentication check
 	res.send(req.user);
 });
 
-app.post("/users/login", (req, res) => {
+app.post("/user/login", (req, res) => {
 	//login the user, given the login credentials in the body
 	var body = _.pick(req.body, ["email", "password"]);
 	User.findByCredentials(body.email, body.password)
@@ -112,7 +112,7 @@ app.post("/users/login", (req, res) => {
 		});
 });
 
-app.post("/users", (req, res) => {
+app.post("/user/signUp", (req, res) => {
 	//to create a new user given, password and email
 	let password;
 	bcrypt.genSalt(10, (err, salt) => {
@@ -145,7 +145,7 @@ app.post("/users", (req, res) => {
 	});
 });
 
-app.delete("/users/me/logout", authenticate, (req, res) => {
+app.delete("/user/me/logout", authenticate, (req, res) => {
 	//removes the current token, i.e. logout the user
 	req.user.removeToken(req.token).then(
 		() => {
@@ -157,7 +157,7 @@ app.delete("/users/me/logout", authenticate, (req, res) => {
 	);
 });
 
-app.post("/users/me/updateName", authenticate, (req, res) => {
+app.put("/user/me/updateName", authenticate, (req, res) => {
 	User.updateOne({ _id: req.user._id.toString() }, { name: req.body.name })
 		.then(response => {
 			res.send(response);
@@ -167,7 +167,7 @@ app.post("/users/me/updateName", authenticate, (req, res) => {
 		});
 });
 
-app.post("/users/me/updateNumber", authenticate, (req, res) => {
+app.put("/user/me/updateNumber", authenticate, (req, res) => {
 	User.updateOne({ _id: req.user._id.toString() }, { phone: req.body.number })
 		.then(response => {
 			res.send(response);
@@ -177,7 +177,7 @@ app.post("/users/me/updateNumber", authenticate, (req, res) => {
 		});
 });
 
-app.post("/users/me/changePassword", authenticate, (req, res) => {
+app.put("/user/me/changePassword", authenticate, (req, res) => {
 	User.findOne({ email: req.user.email }).then(user => {
 		if (!user) {
 			res.status(400).end("cannot find user");
@@ -227,9 +227,9 @@ app.delete("/removeJunctionPointAccess", authenticate, (req, res) => {
     req.user._id === admin_id.toString()
 	) {
 		//removes only if the user tries to remove his own access can add //req.user._id===admin._id
-		JunctionPoint.findOne({ _id: ObjectID(req.query.userID.toString()) }).then(
+		JunctionPoint.findOne({ _id: ObjectID(req.body.userID.toString()) }).then(
 			junctionPoint => {
-				junctionPoint.removeUserAccess(req.query.userID).then(
+				junctionPoint.removeUserAccess(req.body.userID).then(
 					() => {
 						res.status(200).send();
 					},

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 var junctionPointSchema = new mongoose.Schema({
 	longitude: {
@@ -50,6 +50,6 @@ junctionPointSchema.index({
 	unique: true
 });
 
-var JunctionPoint = new mongoose.model('JunctionPoint', junctionPointSchema);
+var JunctionPoint = new mongoose.model("JunctionPoint", junctionPointSchema);
 
 module.exports = { JunctionPoint };
