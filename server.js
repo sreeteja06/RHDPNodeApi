@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 const _ = require("lodash");
 const { ObjectID } = require("mongodb");
 const cors = require("cors");
+const { center_geolocation } = require("./helpers/center_geolocation");
 // const { admin_id } = require('./h-adminid.json');
 
 // eslint-disable-next-line no-unused-vars
@@ -62,7 +63,8 @@ app.get("/getLocations", authenticate, (req, res) => {
 		_accessedByUsers: { _id: req.user._id.toString() }
 	})
 		.then(doc => {
-			res.send(doc);
+			const centerPoints = center_geolocation(doc);
+			res.send({centerPoints, doc});
 		})
 		.catch(e => {
 			res.send(e);
