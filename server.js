@@ -136,6 +136,17 @@ app.post("/user/login", db_connect, async (req, res) => {
   }
 });
 
+app.delete("/user/me/logout", [db_connect, authenticate],async (req, res)=>{
+  try{
+    const result = await req.db.query("exec removeToken @inToken = '"+ req.token +"'");
+    await sql.close();
+    res.send(result);
+  }catch(e){
+    await sql.close();
+    res.status(500).send(e);
+  }
+});
+
 app.get("/user/me", [db_connect, authenticate], (req, res)=> {
   res.send({userID: req.userID});
 });
@@ -151,10 +162,10 @@ app.post("/newJunctionPoint", [db_connect, authenticate], async (req, res)=> {
     console.log(result);
     result = await req.db.query("exec addUserAccess @inUserId = 1, @InJID = "+ JID);
     result = await req.db.query("select * from junctionPoint where JID = "+JID);
-    sql.close();
+    await sql.close();
     res.send(result.recordset[0]);
   }catch(e){
-    sql.close();
+    await sql.close();
     res.status(401).send(e);
   }
 });
@@ -168,6 +179,21 @@ app.get("/getLocations", [db_connect, authenticate], async(req, res)=>{
     res.status(500).send(e);
   }
 });
+
+app.post("/giveLocationAccess", [db_connect, authenticate], async (req, res)=> {
+  if(req.userID === 1){
+    try{
+      let result = await req.db.query("exec addUserAccess @inUserId = " + req.body.addUserid + ", @InJID = " + req.body.JID);
+      sql.close();
+      res.send(result);
+    }catch(e){
+      sql.close();
+      res.status(500).send(e);
+    }
+  }
+});
+
+
 
 app.listen(port, () => {
   console.log(`Started up at port http://localhost:${port}/`);

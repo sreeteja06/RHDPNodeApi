@@ -4,6 +4,7 @@ var authenticate = async (req, res, next) => {
 	try{
 		let result = await req.db.query("exec findByToken @inToken = '"+ token +"'" );
 		req.userID = result.recordset[0].userID;
+		req.token = token;
 		next();
 	}catch(e){
 		res.status(401).send(e);
