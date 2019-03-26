@@ -111,7 +111,7 @@ app.post("/user/login", db_connect, async (req, res) => {
                 "auth" +
                 "')"
             );
-            console.log(result);
+            // console.log(result);
             await sql.close();
             res.append("Access-Control-Allow-Headers", "x-auth, Content-Type");
             res.append("Access-Control-Expose-Headers", "x-auth, Content-Type");
@@ -125,8 +125,8 @@ app.post("/user/login", db_connect, async (req, res) => {
           }
         } catch (e) {
           await sql.close();
-          console.log(e);
-          res.send(500);
+          // console.log(e);
+          res.status(500).send(e);
         }
       }
     );
@@ -159,7 +159,7 @@ app.post("/newJunctionPoint", [db_connect, authenticate], async (req, res)=> {
     result = await req.db.query("select JID from junctionPoint where longitude = "+ req.body.longitude + "and latitude =" + req.body.latitude);
     const JID = result.recordset[0].JID;
     result = await req.db.query("exec addUserAccess @inUserId = " + req.userID +", @InJID = "+ JID);
-    console.log(result);
+    // console.log(result);
     result = await req.db.query("exec addUserAccess @inUserId = 1, @InJID = "+ JID);
     result = await req.db.query("select * from junctionPoint where JID = "+JID);
     await sql.close();
