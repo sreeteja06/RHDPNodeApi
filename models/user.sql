@@ -8,8 +8,8 @@ use rhdpTest;
 GO
 
 create table users(
-  userID int not null primary key,
-  email varchar(60) not null,
+  userID int not null primary key identity(1,1),
+  email varchar(60) not null UNIQUE,
   password varchar(300) not null,
   name varchar(50) not null,
   phone int not null,
