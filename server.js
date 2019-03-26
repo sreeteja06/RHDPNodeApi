@@ -9,6 +9,7 @@ const jwt = require("jsonwebtoken");
 
 const { db_connect } = require("./middleware/db_connect");
 const { authenticate } = require("./middleware/authenticate");
+const { center_geolocation } = require("./helpers/center_geolocation");
 
 let app = express();
 app.use(cors());
@@ -155,6 +156,16 @@ app.post("/newJunctionPoint", [db_connect, authenticate], async (req, res)=> {
   }catch(e){
     sql.close();
     res.status(401).send(e);
+  }
+});
+
+app.get("/getLocations", [db_connect, authenticate], async(req, res)=>{
+  try{
+    let result = await req.db.query("exec getLocationsForUser @inUserId = " + req.userID);
+    const centerPoints = center_geolocation(result.recordset);
+    res.send({centerPoints, doc: result.recordset});
+  }catch(e){
+    res.status(500).send(e);
   }
 });
 
