@@ -31,14 +31,13 @@ app.get("/", (req, res) => {
 	/user/login - auth required<br/>
 	/user/signUp - to create a new user<br/>
 	/user/me/logout - auth required<br/>
-	/removeJunctionPoint - auth required - only the admin<br/>
-	/removeJunctionPointAccess - auth required - only the admin<br/>
-	/user/me/updateName - auth required <br/>
-	/user/me/updateNumber - auth required <br/>
-	/user/me/changePassword - auth required <br/>
 	`);
 });
-
+// /removeJunctionPoint - auth required - only the admin<br/ >
+//   /removeJunctionPointAccess - auth required - only the admin<br/ >
+//   /user/me / updateName - auth required < br />
+//     /user/me / updateNumber - auth required < br />
+//       /user/me / changePassword - auth required < br />
 app.post("/user/signUp", db_connect, (req, res) => {
   let password;
   bcrypt.genSalt(10, (err, salt) => {
