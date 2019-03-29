@@ -173,8 +173,10 @@ app.get("/getLocations", [db_connect, authenticate], async(req, res)=>{
   try{
     let result = await req.db.query("exec getLocationsForUser @inUserId = " + req.userID);
     const centerPoints = center_geolocation(result.recordset);
+    sql.close();
     res.send({centerPoints, doc: result.recordset});
   }catch(e){
+    sql.close();
     res.status(500).send(e);
   }
 });
