@@ -117,8 +117,7 @@ app.post("/user/login", db_connect, async (req, res) => {
             res
               .header("x-auth", token)
               .send({ user: { userID: userID, email } });
-          }
-          else{
+          } else {
             await sql.close();
             res.send(401);
           }
@@ -135,66 +134,129 @@ app.post("/user/login", db_connect, async (req, res) => {
   }
 });
 
-app.delete("/user/me/logout", [db_connect, authenticate],async (req, res)=>{
-  try{
-    const result = await req.db.query("exec removeToken @inToken = '"+ req.token +"'");
+app.delete("/user/me/logout", [db_connect, authenticate], async (req, res) => {
+  try {
+    const result = await req.db.query(
+      "exec removeToken @inToken = '" + req.token + "'"
+    );
     await sql.close();
     res.send(result);
-  }catch(e){
+  } catch (e) {
     await sql.close();
     res.status(500).send(e);
   }
 });
 
-app.get("/user/me", [db_connect, authenticate], (req, res)=> {
-  res.send({userID: req.userID});
+app.get("/user/me", [db_connect, authenticate], (req, res) => {
+  res.send({ userID: req.userID });
 });
 
-app.post("/newJunctionPoint", [db_connect, authenticate], async (req, res)=> {
-  try{
+app.post("/newJunctionPoint", [db_connect, authenticate], async (req, res) => {
+  try {
     let result = await req.db.query(
-      "insert into junctionPoint (longitude, latitude, area, city, junctionName) values('" + req.body.longitude + "','" + req.body.latitude + "','" + req.body.area + "','" + req.body.city + "','" + req.body.junctionName +"')"
+      "insert into junctionPoint (longitude, latitude, area, city, junctionName) values('" +
+        req.body.longitude +
+        "','" +
+        req.body.latitude +
+        "','" +
+        req.body.area +
+        "','" +
+        req.body.city +
+        "','" +
+        req.body.junctionName +
+        "')"
     );
-    result = await req.db.query("select JID from junctionPoint where longitude = "+ req.body.longitude + "and latitude =" + req.body.latitude);
+    result = await req.db.query(
+      "select JID from junctionPoint where longitude = " +
+        req.body.longitude +
+        "and latitude =" +
+        req.body.latitude
+    );
     const JID = result.recordset[0].JID;
-    result = await req.db.query("exec addUserAccess @inUserId = " + req.userID +", @InJID = "+ JID);
+    result = await req.db.query(
+      "exec addUserAccess @inUserId = " + req.userID + ", @InJID = " + JID
+    );
     // console.log(result);
-    result = await req.db.query("exec addUserAccess @inUserId = 1, @InJID = "+ JID);
-    result = await req.db.query("select * from junctionPoint where JID = "+JID);
+    result = await req.db.query(
+      "exec addUserAccess @inUserId = 1, @InJID = " + JID
+    );
+    result = await req.db.query(
+      "select * from junctionPoint where JID = " + JID
+    );
     await sql.close();
     res.send(result.recordset[0]);
-  }catch(e){
+  } catch (e) {
     await sql.close();
     res.status(401).send(e);
   }
 });
 
-app.get("/getLocations", [db_connect, authenticate], async(req, res)=>{
-  try{
-    let result = await req.db.query("exec getLocationsForUser @inUserId = " + req.userID);
+app.get("/getLocations", [db_connect, authenticate], async (req, res) => {
+  try {
+    let result = await req.db.query(
+      "exec getLocationsForUser @inUserId = " + req.userID
+    );
     const centerPoints = center_geolocation(result.recordset);
-    sql.close();
-    res.send({centerPoints, doc: result.recordset});
-  }catch(e){
-    sql.close();
+    let jids = [];
+    result.recordset.forEach(e => {
+      jids.push(e.JID[0]);
+    });
+    let activeSatusResult = await req.db.query(`
+    WITH cte 
+     AS (SELECT JID, 
+                Error_Code,
+                Row_number() 
+                  OVER ( 
+                    partition BY JID 
+                    ORDER BY UPLOAD_TIME DESC) rn 
+         FROM   TrafficInfoPage where JID in (${jids})) 
+    SELECT JID, Error_Code
+    FROM   cte 
+    WHERE  rn = 1
+    ORDER BY JID
+    `);
+    await sql.close();
+    result.recordset.forEach(e => {
+      temp = activeSatusResult.recordset.find(h => {
+        return (h.JID === e.JID[0])
+      })
+      if (temp != undefined) {
+        e["activeStatus"] = temp.Error_Code;
+      }
+      else {
+        e["activeStatus"] = 2;
+      }
+    })
+    console.log(activeSatusResult.recordset);
+    res.send({ centerPoints, doc: result.recordset });
+  } catch (e) {
+    await sql.close();
+    console.log(e);
     res.status(500).send(e);
   }
 });
 
-app.post("/giveLocationAccess", [db_connect, authenticate], async (req, res)=> {
-  if(req.userID === 1){
-    try{
-      let result = await req.db.query("exec addUserAccess @inUserId = " + req.body.addUserid + ", @InJID = " + req.body.JID);
-      sql.close();
-      res.send(result);
-    }catch(e){
-      sql.close();
-      res.status(500).send(e);
+app.post(
+  "/giveLocationAccess",
+  [db_connect, authenticate],
+  async (req, res) => {
+    if (req.userID === 1) {
+      try {
+        let result = await req.db.query(
+          "exec addUserAccess @inUserId = " +
+            req.body.addUserid +
+            ", @InJID = " +
+            req.body.JID
+        );
+        await sql.close();
+        res.send(result);
+      } catch (e) {
+        await sql.close();
+        res.status(500).send(e);
+      }
     }
   }
-});
-
-
+);
 
 app.listen(port, () => {
   console.log(`Started up at port http://localhost:${port}/`);
