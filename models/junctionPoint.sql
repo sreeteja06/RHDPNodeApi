@@ -9,7 +9,7 @@ go
 
 create table junctionPoint 
 ( 
-  JID int primary key not null IDENTITY(1,1),
+  JID int primary key not null,
   longitude FLOAT not null,
   latitude FLOAT not null,
   area varchar(40) not null,
