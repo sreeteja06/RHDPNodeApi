@@ -207,7 +207,7 @@ app.get("/getLocations", [db_connect, authenticate], async (req, res) => {
     result.recordset.forEach(e => {
       jids.push(e.JID[0]);
     });
-    console.log(jids);
+    // console.log(jids);
     let activeSatusResult = await req.db.query(`
     WITH cte 
      AS (SELECT UID, 
@@ -234,7 +234,7 @@ app.get("/getLocations", [db_connect, authenticate], async (req, res) => {
         e["activeStatus"] = 2;
       }
     })
-    console.log(activeSatusResult.recordset);
+    // console.log(activeSatusResult.recordset);
     res.send({ centerPoints, doc: result.recordset });
   } catch (e) {
     await sql.close();

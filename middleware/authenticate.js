@@ -1,4 +1,4 @@
-
+const sql = require('mssql');
 var authenticate = async (req, res, next) => {
 	const token = req.header("x-auth");
 	try{
@@ -7,6 +7,7 @@ var authenticate = async (req, res, next) => {
 		req.token = token;
 		next();
 	}catch(e){
+		await sql.close();
 		res.status(401).send(e);
 	}
 };
