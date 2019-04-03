@@ -156,7 +156,9 @@ app.get("/user/me", [db_connect, authenticate], (req, res) => {
 app.post("/newJunctionPoint", [db_connect, authenticate], async (req, res) => {
   try {
     let result = await req.db.query(
-      "insert into junctionPoint (longitude, latitude, area, city, junctionName) values('" +
+      "insert into junctionPoint (JID, longitude, latitude, area, city, junctionName) values('" +
+        req.body.JID +
+        "','" +
         req.body.longitude +
         "','" +
         req.body.latitude +
@@ -203,19 +205,20 @@ app.get("/getLocations", [db_connect, authenticate], async (req, res) => {
     result.recordset.forEach(e => {
       jids.push(e.JID[0]);
     });
+    console.log(jids);
     let activeSatusResult = await req.db.query(`
     WITH cte 
-     AS (SELECT JID, 
+     AS (SELECT UID, 
                 Error_Code,
                 Row_number() 
                   OVER ( 
-                    partition BY JID 
+                    partition BY UID 
                     ORDER BY UPLOAD_TIME DESC) rn 
-         FROM   TrafficInfoPage where JID in (${jids})) 
-    SELECT JID, Error_Code
+         FROM   TrafficInfoPage where UID in (${jids.toString()})) 
+    SELECT UID, ERROR_CODE
     FROM   cte 
     WHERE  rn = 1
-    ORDER BY JID
+    ORDER BY UID
     `);
     await sql.close();
     result.recordset.forEach(e => {
@@ -259,6 +262,10 @@ app.post(
     }
   }
 );
+
+app.get("/statistics/getDensity", [db_connect, authenticate], async(req, res) =>{
+  res.send("not yet")
+});
 
 app.listen(port, () => {
   console.log(`Started up at port http://localhost:${port}/`);
