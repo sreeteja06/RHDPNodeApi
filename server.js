@@ -226,9 +226,10 @@ app.get("/getLocations", [db_connect, authenticate], async (req, res) => {
     result.recordset.forEach(e => {
       temp = activeSatusResult.recordset.find(h => {
         return (h.UID === e.JID[0])
-      })
+      });
+      // console.log(temp);
       if (temp != undefined) {
-        e["activeStatus"] = temp.Error_Code;
+        e["activeStatus"] = temp.ERROR_CODE;
       }
       else {
         e["activeStatus"] = 2;
