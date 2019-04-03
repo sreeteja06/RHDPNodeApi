@@ -80,6 +80,7 @@ app.post("/user/signUp", db_connect, (req, res) => {
           .header("x-auth", token)
           .send({ userID: userID, email: req.body.email });
       } catch (err) {
+        await sql.close();
         res.send(err);
       }
     });
@@ -149,7 +150,8 @@ app.delete("/user/me/logout", [db_connect, authenticate], async (req, res) => {
   }
 });
 
-app.get("/user/me", [db_connect, authenticate], (req, res) => {
+app.get("/user/me", [db_connect, authenticate], async(req, res) => {
+  await sql.close();
   res.send({ userID: req.userID });
 });
 
@@ -223,7 +225,7 @@ app.get("/getLocations", [db_connect, authenticate], async (req, res) => {
     await sql.close();
     result.recordset.forEach(e => {
       temp = activeSatusResult.recordset.find(h => {
-        return (h.JID === e.JID[0])
+        return (h.UID === e.JID[0])
       })
       if (temp != undefined) {
         e["activeStatus"] = temp.Error_Code;
@@ -264,7 +266,8 @@ app.post(
 );
 
 app.get("/statistics/getDensity", [db_connect, authenticate], async(req, res) =>{
-  res.send("not yet")
+  await sql.close();  
+  res.send("not yet");
 });
 
 app.listen(port, () => {
