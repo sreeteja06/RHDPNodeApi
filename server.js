@@ -101,7 +101,7 @@ app.post("/user/login", db_connect, async (req, res) => {
     let result = await req.db.query(
       "select userID, password from users where email = '" + email + "'"
       );
-    const userID = result.recordset[0].userID;
+      const userID = result.recordset[0].userID;
     await req.db.query("delete from tokens where userID = '" + userID + "'");
     bcrypt.compare(
       password,
@@ -132,15 +132,15 @@ app.post("/user/login", db_connect, async (req, res) => {
           }
         } catch (e) {
           await sql.close();
-          console.log(e);
-          res.status(500).send(e);
+          // console.log(e);
+          res.status(401).send(e);
         }
       }
     );
   } catch (err) {
     await sql.close();
-    console.log(err);
-    res.send(500);
+    // console.log(err);
+    res.sendStatus(401).send(err);
   }
 });
 
