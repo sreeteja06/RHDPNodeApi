@@ -23,6 +23,15 @@ const generateAuthToken = (userID, access) => {
   return token;
 };
 
+const decodeAuthToken = (token) => {
+  try{
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return decoded;
+  }catch(e){
+    throw e;
+  }
+};
+
 app.get("/", (req, res) => {
   res.send(`available routes<br/>
 	/newJunctionPoint - auth required<br/>
@@ -100,9 +109,11 @@ app.post("/user/login", db_connect, async (req, res) => {
       await sql.close();
     });
     let result = await req.db.query(
-      "select userID, password from users where email = '" + email + "'"
-      );
-      const userID = result.recordset[0].userID;
+      "select userID, password, name, branch from users where email = '" + email + "'"
+    );  
+    const userID = result.recordset[0].userID;
+    const name = result.recordset[0].name;
+    const branch = result.recordset[0].branch;
     await req.db.query("delete from tokens where userID = '" + userID + "'");
     bcrypt.compare(
       password,
@@ -120,13 +131,10 @@ app.post("/user/login", db_connect, async (req, res) => {
                 "auth" +
                 "')"
             );
+            const decoded = decodeAuthToken(token);
             // console.log(result);
             await sql.close();
-            res.append("Access-Control-Allow-Headers", "x-auth, Content-Type");
-            res.append("Access-Control-Expose-Headers", "x-auth, Content-Type");
-            res
-              .header("x-auth", token)
-              .send({  userID: userID, email , token });
+            res.send({  userID: userID, email, name, branch,exp: decoded.exp , token });
           } else {
             await sql.close();
             res.send(401);
@@ -141,7 +149,7 @@ app.post("/user/login", db_connect, async (req, res) => {
   } catch (err) {
     await sql.close();
     // console.log(err);
-    res.sendStatus(401).send(err);
+    res.status(401);
   }
 });
 
