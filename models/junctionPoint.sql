@@ -1,6 +1,3 @@
---drop database rhdpTest;
---go
-
 --create database rhdpTest;
 --go
 
@@ -62,4 +59,3 @@ BEGIN
 	INSERT into jAccess values(@InJID, @inUserId);
 END
 GO
-
