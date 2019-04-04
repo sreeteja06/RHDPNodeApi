@@ -30,7 +30,8 @@ app.get("/", (req, res) => {
 	/giveLocationAccess - auth required - only the admin<br/>
 	/user/login - auth required<br/>
 	/user/signUp - to create a new user<br/>
-	/user/me/logout - auth required<br/>
+  /user/me/logout - auth required<br/>
+  /statistics/getDensity - auth required <br/>
 	`);
 });
 // /removeJunctionPoint - auth required - only the admin<br/ >
