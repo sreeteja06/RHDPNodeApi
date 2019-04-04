@@ -118,7 +118,7 @@ app.post("/user/login", db_connect, async (req, res) => {
             res.append("Access-Control-Expose-Headers", "x-auth, Content-Type");
             res
               .header("x-auth", token)
-              .send({ user: { userID: userID, email } });
+              .send({ user: { userID: userID, email }, token });
           } else {
             await sql.close();
             res.send(401);
