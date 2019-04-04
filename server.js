@@ -110,7 +110,10 @@ app.post("/user/login", db_connect, async (req, res) => {
     });
     let result = await req.db.query(
       "select userID, password, name, branch from users where email = '" + email + "'"
-    );  
+    );
+    if(result.recordset[0] === undefined){
+      throw "no email found"
+    }
     const userID = result.recordset[0].userID;
     const name = result.recordset[0].name;
     const branch = result.recordset[0].branch;
@@ -134,7 +137,7 @@ app.post("/user/login", db_connect, async (req, res) => {
             const decoded = decodeAuthToken(token);
             // console.log(result);
             await sql.close();
-            res.send({  userID: userID, email, name, branch,exp: decoded.exp , token });
+            res.send({  userID: userID, name, branch,exp: decoded.exp , token });
           } else {
             await sql.close();
             res.send(401);
@@ -147,9 +150,9 @@ app.post("/user/login", db_connect, async (req, res) => {
       }
     );
   } catch (err) {
+    console.log(err);
     await sql.close();
-    // console.log(err);
-    res.status(401);
+    res.status(401).end();
   }
 });
 
