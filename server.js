@@ -255,8 +255,9 @@ app.get("/getLocations", [db_connect, authenticate], async (req, res) => {
     `);
     await sql.close();
     result.recordset.forEach(e => {
+      e.JID = e.JID[0]
       temp = activeSatusResult.recordset.find(h => {
-        return (h.UID === e.JID[0])
+        return (h.UID === e.JID)
       });
       // console.log(temp);
       if (temp != undefined) {
