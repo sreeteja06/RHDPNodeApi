@@ -18,7 +18,7 @@ const port = process.env.PORT || 1337;
 
 const generateAuthToken = (userID, access) => {
   const token = jwt
-    .sign({ userID: userID, access }, process.env.JWT_SECRET)
+    .sign({ userID: userID, access }, process.env.JWT_SECRET, {expiresIn: "12h"})
     .toString();
   return token;
 };
@@ -50,6 +50,9 @@ app.post("/user/signUp", db_connect, (req, res) => {
       }
       password = hash;
       try {
+        req.on('close', async (err) => {
+          await sql.close();
+        });
         let result = await req.db.query(
           "insert into users (email, password, name, phone) values('" +
             req.body.email +
@@ -90,7 +93,11 @@ app.post("/user/signUp", db_connect, (req, res) => {
 app.post("/user/login", db_connect, async (req, res) => {
   const password = req.body.password;
   const email = req.body.email;
+  
   try {
+    req.on('close', async (err) => {
+      await sql.close();
+    });
     let result = await req.db.query(
       "select userID, password from users where email = '" + email + "'"
       );
@@ -118,7 +125,7 @@ app.post("/user/login", db_connect, async (req, res) => {
             res.append("Access-Control-Expose-Headers", "x-auth, Content-Type");
             res
               .header("x-auth", token)
-              .send({ user: { userID: userID, email }, token });
+              .send({  userID: userID, email , token });
           } else {
             await sql.close();
             res.send(401);
@@ -139,6 +146,9 @@ app.post("/user/login", db_connect, async (req, res) => {
 
 app.delete("/user/me/logout", [db_connect, authenticate], async (req, res) => {
   try {
+    req.on("close", async err => {
+      await sql.close();
+    });
     const result = await req.db.query(
       "exec removeToken @inToken = '" + req.token + "'"
     );
@@ -151,12 +161,18 @@ app.delete("/user/me/logout", [db_connect, authenticate], async (req, res) => {
 });
 
 app.get("/user/me", [db_connect, authenticate], async(req, res) => {
+  req.on("close", async err => {
+    await sql.close();
+  });
   await sql.close();
   res.send({ userID: req.userID });
 });
 
 app.post("/newJunctionPoint", [db_connect, authenticate], async (req, res) => {
   try {
+    req.on("close", async err => {
+      await sql.close();
+    });
     let result = await req.db.query(
       "insert into junctionPoint (JID, longitude, latitude, area, city, junctionName) values('" +
         req.body.JID +
@@ -199,6 +215,9 @@ app.post("/newJunctionPoint", [db_connect, authenticate], async (req, res) => {
 
 app.get("/getLocations", [db_connect, authenticate], async (req, res) => {
   try {
+    req.on("close", async err => {
+      await sql.close();
+    });
     let result = await req.db.query(
       "exec getLocationsForUser @inUserId = " + req.userID
     );
@@ -250,6 +269,9 @@ app.post(
   async (req, res) => {
     if (req.userID === 1) {
       try {
+        req.on('close', async (err) => {
+          await sql.close();
+        });
         let result = await req.db.query(
           "exec addUserAccess @inUserId = " +
             req.body.addUserid +
