@@ -6,7 +6,7 @@ const timerpageApi = ( packets, date_time ) => {
     for(let i = 0; i<new_packets.length;i++){
         laststage.push(new_packets[i][new_packets[i].length - 6]);
     }
-    console.log(laststage);
+    console.log("last stage:"+laststage);
     laststage.pop();
     laststage.push(0);
     let implementTime = [];
@@ -15,7 +15,7 @@ const timerpageApi = ( packets, date_time ) => {
         let tTime = new Date(date_time[i].getTime() + laststageTime.getTime());
         implementTime.push( tTime );
     }
-    console.log(implementTime);
+    console.log("implement time:"+implementTime);
     let timeLeft, timeAllocated;
     const reValue = findTimeLeft(implementTime, new_packets);
     timeLeft = reValue.timeLeft;
