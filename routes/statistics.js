@@ -6,12 +6,7 @@ const { findDensity, findAvgTime } = require("../helpers/statisticsHelper");
 const { db_connect } = require("../middleware/db_connect");
 const { authenticate } = require("../middleware/authenticate");
 
-const packets = [
-  "111001000000000100001111000000111000100000000100000111010001010100110001001001010000111100000000000000000000000001110110",
-  "111001000000000100001111000000111000100000000100000111010001010100110001001001010000111100000000000000000000000001110111"
-];
-
-router.get("/getDensity", [db_connect, authenticate], async (req, res) => {
+router.post("/getDensity", [db_connect, authenticate], async (req, res) => {
   try {
     let jidds = await req.db.query(
       "select junctionPoint.JID, junctionName from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = " +
@@ -70,7 +65,7 @@ router.get("/getDensity", [db_connect, authenticate], async (req, res) => {
   }
 });
 
-router.get("/getAvgTime", [db_connect, authenticate], async (req, res) => {
+router.post("/getAvgTime", [db_connect, authenticate], async (req, res) => {
   try {
     let jidds = await req.db.query(
       "select junctionPoint.JID from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = " +
@@ -132,7 +127,7 @@ router.get("/getAvgTime", [db_connect, authenticate], async (req, res) => {
   }
 });
 
-router.get("/getActSig", [db_connect, authenticate], async (req, res) => {
+router.post("/getActSig", [db_connect, authenticate], async (req, res) => {
   try {
     let result = await req.db.query(
       "select junctionPoint.JID, junctionName from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = " +
@@ -177,9 +172,6 @@ router.get("/getActSig", [db_connect, authenticate], async (req, res) => {
         error.push(e.name);
       }
     });
-    console.log(warning);
-    console.log(running);
-    console.log(error);
     await sql.close();
     res.send({"running":running, "warning":warning, "error":error});
   } catch (e) {
@@ -187,4 +179,5 @@ router.get("/getActSig", [db_connect, authenticate], async (req, res) => {
     console.log(e);
   }
 });
+
 module.exports = router;
