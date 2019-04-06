@@ -110,6 +110,17 @@ router.get("/getAvgTime", [db_connect, authenticate], async (req, res) => {
     });
     Sendres = findAvgTime(result, req.body.grpBy);
     await sql.close();
+    Sendres = Sendres.map( e => {
+      const temp = e.find(x => {
+        return x != null;
+      })
+      if(temp){
+        return e;
+      }
+      else{
+        return [];
+      }
+    })
     res.send(Sendres);
   } catch (e) {
     await sql.close();
