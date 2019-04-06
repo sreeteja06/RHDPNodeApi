@@ -96,7 +96,7 @@ router.get("/getAvgTime", [db_connect, authenticate], async (req, res) => {
     } else if (timeF == 4) {
       timeF = 43800;
     }
-    let result = []
+    let result = [];
     result = await req.db.query(
       `DECLARE @NOWDATE DATETIME;
       set @NOWDATE = DATEADD(HH, +5, GETDATE());
@@ -110,17 +110,16 @@ router.get("/getAvgTime", [db_connect, authenticate], async (req, res) => {
     });
     Sendres = findAvgTime(result, req.body.grpBy);
     await sql.close();
-    Sendres = Sendres.map( e => {
+    Sendres = Sendres.map(e => {
       const temp = e.find(x => {
         return x != null;
-      })
-      if(temp){
+      });
+      if (temp) {
         return e;
-      }
-      else{
+      } else {
         return [];
       }
-    })
+    });
     res.send(Sendres);
   } catch (e) {
     await sql.close();
@@ -133,4 +132,59 @@ router.get("/getAvgTime", [db_connect, authenticate], async (req, res) => {
   }
 });
 
+router.get("/getActSig", [db_connect, authenticate], async (req, res) => {
+  try {
+    let result = await req.db.query(
+      "select junctionPoint.JID, junctionName from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = " +
+        req.userID
+    );
+    result = result.recordset.map(x => {
+      return { JID: x.JID, name: x.junctionName };
+    });
+    let jids = result.map(x => x.JID);
+    console.log(result);
+     
+    let activeSatusResult = await req.db.query(`
+    WITH cte 
+     AS (SELECT UID, 
+                Error_Code,
+                Row_number() 
+                  OVER ( 
+                    partition BY UID 
+                    ORDER BY UPLOAD_TIME DESC) rn 
+         FROM   TrafficInfoPage where UID in (${jids.toString()})) 
+    SELECT UID, ERROR_CODE
+    FROM   cte 
+    WHERE  rn = 1
+    ORDER BY UID
+    `);
+    let running = [];
+    let warning = [];
+    let error = [];
+    result.forEach(e => {
+      let temp = activeSatusResult.recordset.find(x => {
+        return x.UID === e.JID;
+      });
+      if(temp != undefined){
+        if (temp.ERROR_CODE == 0) {
+          running.push(e.name);
+        } else if (temp.ERROR_CODE == 1) {
+          warning.push(e.name);
+        } else {
+          error.push(e.name);
+        }
+      }else{
+        error.push(e.name);
+      }
+    });
+    console.log(warning);
+    console.log(running);
+    console.log(error);
+    await sql.close();
+    res.send({"running":running, "warning":warning, "error":error});
+  } catch (e) {
+    await sql.close();
+    console.log(e);
+  }
+});
 module.exports = router;
