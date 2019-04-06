@@ -2,11 +2,7 @@ const express = require("express");
 const router = express.Router();
 const sql = require("mssql");
 
-const {
-  findDensity,
-  findAvgTime,
-  DecodePackets
-} = require("../helpers/statisticsHelper");
+const { findDensity, findAvgTime } = require("../helpers/statisticsHelper");
 const { db_connect } = require("../middleware/db_connect");
 const { authenticate } = require("../middleware/authenticate");
 
@@ -22,7 +18,6 @@ router.get("/getDensity", [db_connect, authenticate], async (req, res) => {
         req.userID
     );
     const jids = jidds.recordset.map(x => x.JID);
-    console.log(jids);
     let result = [];
     result = await req.db.query(
       `select * from LogDelhi where UID in (${jids.toString()}) 
@@ -61,35 +56,41 @@ router.get("/getDensity", [db_connect, authenticate], async (req, res) => {
   }
 });
 
-router.get("/getAvgTime", [db_connect], async (req, res) => {
+router.get("/getAvgTime", [db_connect, authenticate], async (req, res) => {
   try {
-    // let jids = await req.db.query("select * from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = @inUserId");
-    const jids = [23];
+    let jidds = await req.db.query(
+      "select junctionPoint.JID from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = " +
+        req.userID
+    );
+    jidds = jidds.recordset.map(x => x.JID);
+    const jids = req.body.interID;
+    if (
+      jidds.find(e => {
+        return e == jids;
+      }) === undefined
+    ) {
+      throw "401";
+    }
+
     let result = [];
     result = await req.db.query(
       `select * from LogDelhi where UID in (${jids.toString()}) 
       and Upload_Time > '2019-04-05'`
     );
-    let parsedObj = {};
-    jids.forEach(e => {
-      parsedObj[e] = [];
+    result = result.recordset.map(e => {
+      return { Upload_Time: e.Upload_Time, Message: e.Message };
     });
-    let resObj = {};
-    console.log(result.recordset.length);
-    result.recordset.forEach(e => {
-      parsedObj[e.UID].push(e.Message);
-    });
-    for (let key in parsedObj) {
-      if (parsedObj[key] !== undefined && parsedObj[key].length > 0) {
-        resObj[key] = findAvgTime(parsedObj[key]);
-      }
-    }
+    Sendres = findAvgTime(result, req.body.grpBy);
     await sql.close();
-    res.send(resObj);
+    res.send(Sendres);
   } catch (e) {
     await sql.close();
     console.log(e);
-    res.sendStatus(500).end();
+    if (e == 401) {
+      res.sendStatus(401).end();
+    } else {
+      res.sendStatus(500).end();
+    }
   }
 });
 

@@ -58,7 +58,7 @@ router.get("/getLocations", [db_connect, authenticate], async (req, res) => {
     });
     let result = await req.db.query(
       "exec getLocationsForUser @inUserId = " + req.userID
-    );
+    );  
     const centerPoints = center_geolocation(result.recordset);
     let jids = [];
     result.recordset.forEach(e => {
