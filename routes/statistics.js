@@ -18,10 +18,24 @@ router.get("/getDensity", [db_connect, authenticate], async (req, res) => {
         req.userID
     );
     const jids = jidds.recordset.map(x => x.JID);
+    let timeF = req.body.timeF;
+    if (timeF == 1) {
+      timeF = 15;
+    } else if (timeF == 2) {
+      timeF = 60;
+    } else if (timeF == 3) {
+      timeF = 10080;
+    } else if (timeF == 4) {
+      timeF = 43800;
+    }
     let result = [];
     result = await req.db.query(
-      `select * from LogDelhi where UID in (${jids.toString()}) 
-      and Upload_Time > '2019-04-05'`
+      `DECLARE @NOWDATE DATETIME;
+      set @NOWDATE = DATEADD(HH, +5, GETDATE());
+      set @NOWDATE = DATEADD(n, +30, @NOWDATE);
+      set @NOWDATE = DATEADD(mi, -${timeF}, @NOWDATE);
+      select * from LogDelhi where UID in (${jids.toString()}) 
+      and Upload_Time > @NOWDATE`
     );
     let parsedObj = {};
     jids.forEach(e => {
@@ -72,10 +86,24 @@ router.get("/getAvgTime", [db_connect, authenticate], async (req, res) => {
       throw "401";
     }
 
-    let result = [];
+    let timeF = req.body.timeF;
+    if (timeF == 1) {
+      timeF = 15;
+    } else if (timeF == 2) {
+      timeF = 60;
+    } else if (timeF == 3) {
+      timeF = 10080;
+    } else if (timeF == 4) {
+      timeF = 43800;
+    }
+    let result = []
     result = await req.db.query(
-      `select * from LogDelhi where UID in (${jids.toString()}) 
-      and Upload_Time > '2019-04-05'`
+      `DECLARE @NOWDATE DATETIME;
+      set @NOWDATE = DATEADD(HH, +5, GETDATE());
+      set @NOWDATE = DATEADD(n, +30, @NOWDATE);
+      set @NOWDATE = DATEADD(mi, -${timeF}, @NOWDATE);
+      select * from LogDelhi where UID in (${jids.toString()}) 
+      and Upload_Time > @NOWDATE`
     );
     result = result.recordset.map(e => {
       return { Upload_Time: e.Upload_Time, Message: e.Message };
