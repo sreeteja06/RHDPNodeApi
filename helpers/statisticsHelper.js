@@ -45,6 +45,23 @@ const getGrpByFirstValue = (Upload_Time, grpBy) => {
     } else {
       return 2;
     }
+  }else if (grpBy === 3) {
+    //0 - peak, 1 - off -peak
+    let x = new Date(Upload_Time.toISOString().replace("Z", "")).getHours();
+    if (
+      x === 8 ||
+      x === 9 ||
+      x === 10 ||
+      x === 11 ||
+      x === 17 ||
+      x === 18 ||
+      x === 19 ||
+      x === 20
+    ) {
+      return 0;
+    } else {
+      return 1;
+    }
   } else if (grpBy === 4) {
     // 0 - sunday, 1 - monday ......
     return new Date(Upload_Time.toISOString().replace("Z", "")).getDay();
@@ -77,6 +94,8 @@ const findAvgTime = (resArr, grpBy) => {
     n = 3;
   } else if (grpBy === 1) {
     n = 24;
+  } else if (grpBy === 3) {
+    n = 2;
   }
   let length = new Array(n).fill(0);
   let res = new Array(n).fill(0);
