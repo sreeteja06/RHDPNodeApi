@@ -51,6 +51,21 @@ router.post("/newJunctionPoint", [db_connect, authenticate], async (req, res) =>
     }
 });
 
+router.get("/getUserJIDS", [db_connect, authenticate], async(req,res)=>{
+  try {
+    let jids = await req.db.query(
+      "select junctionPoint.JID, junctionName  from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = " +
+        req.userID
+    );
+    jids = jids.recordset.map(x => { return {JID: x.JID, name: x.junctionName}});
+    res.send(jids);
+  } catch (e) {
+    await sql.close();
+    console.log(e);
+    res.sendStatus(500).send(e);
+  }
+})
+
 router.get("/getLocations", [db_connect, authenticate], async (req, res) => {
   try {
     req.on("close", async err => {
