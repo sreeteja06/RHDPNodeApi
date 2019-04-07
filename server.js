@@ -3,10 +3,7 @@ require("./config/config");
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const sql = require("mssql");
 
-const { db_connect } = require("./middleware/db_connect");
-const { authenticate } = require("./middleware/authenticate");
 const userRoute = require('./routes/user');
 const locationRoute = require('./routes/locations');
 const statisticsRoute = require('./routes/statistics');

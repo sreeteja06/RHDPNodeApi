@@ -11,12 +11,6 @@ const config = {
         encrypt: true // Use this if you're on Windows Azure
     }
 };
-const connection = async () => {
-    try{
-        return await sql.connect(config);
-    }catch(e){
-        console.log(e);
-    }
-}
+const connection = new sql.ConnectionPool(config);
 
 module.exports = { connection };

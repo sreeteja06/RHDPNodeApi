@@ -1,14 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const sql = require("mssql");
 
 const { findDensity, findAvgTime } = require("../helpers/statisticsHelper");
-const { db_connect } = require("../middleware/db_connect");
 const { authenticate } = require("../middleware/authenticate");
+const { connection } = require("../db/sql_connect");
 
-router.post("/getDensity", [db_connect, authenticate], async (req, res) => {
+router.post("/getDensity",  authenticate, async (req, res) => {
+  let pool;
   try {
-    let jidds = await req.db.query(
+    pool = await connection.connect();
+    let jidds = await pool.request().query(
       "select junctionPoint.JID, junctionName from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = " +
         req.userID
     );
@@ -24,7 +25,7 @@ router.post("/getDensity", [db_connect, authenticate], async (req, res) => {
       timeF = 43800;
     }
     let result = [];
-    result = await req.db.query(
+    result = await pool.request().query(
       `DECLARE @NOWDATE DATETIME;
       set @NOWDATE = DATEADD(HH, +5, GETDATE());
       set @NOWDATE = DATEADD(n, +30, @NOWDATE);
@@ -46,7 +47,7 @@ router.post("/getDensity", [db_connect, authenticate], async (req, res) => {
         resObj[key] = findDensity(parsedObj[key]);
       }
     }
-    await sql.close();
+    await pool.close();
     let formatRes = [];
     for (let key in resObj) {
       let temp = {};
@@ -59,18 +60,22 @@ router.post("/getDensity", [db_connect, authenticate], async (req, res) => {
     }
     res.send(formatRes);
   } catch (e) {
-    await sql.close();
     console.log(e);
+    await pool.close();
     res.sendStatus(500).end();
   }
 });
 
-router.post("/getAvgTime", [db_connect, authenticate], async (req, res) => {
+router.post("/getAvgTime", authenticate, async (req, res) => {
+  let pool;
   try {
-    let jidds = await req.db.query(
-      "select junctionPoint.JID from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = " +
-        req.userID
-    );
+    pool = await connection.connect();
+    let jidds = await pool
+      .request()
+      .query(
+        "select junctionPoint.JID from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = " +
+          req.userID
+      );
     jidds = jidds.recordset.map(x => x.JID);
     const jids = req.body.interID;
     if (
@@ -92,7 +97,7 @@ router.post("/getAvgTime", [db_connect, authenticate], async (req, res) => {
       timeF = 43800;
     }
     let result = [];
-    result = await req.db.query(
+    result = await pool.request().query(
       `DECLARE @NOWDATE DATETIME;
       set @NOWDATE = DATEADD(HH, +5, GETDATE());
       set @NOWDATE = DATEADD(n, +30, @NOWDATE);
@@ -104,7 +109,7 @@ router.post("/getAvgTime", [db_connect, authenticate], async (req, res) => {
       return { Upload_Time: e.Upload_Time, Message: e.Message };
     });
     Sendres = findAvgTime(result, req.body.grpBy);
-    await sql.close();
+    await pool.close();
     Sendres = Sendres.map(e => {
       const temp = e.find(x => {
         return x != null;
@@ -117,8 +122,8 @@ router.post("/getAvgTime", [db_connect, authenticate], async (req, res) => {
     });
     res.send(Sendres);
   } catch (e) {
-    await sql.close();
     console.log(e);
+    await pool.close();
     if (e == 401) {
       res.sendStatus(401).end();
     } else {
@@ -127,19 +132,23 @@ router.post("/getAvgTime", [db_connect, authenticate], async (req, res) => {
   }
 });
 
-router.post("/getActSig", [db_connect, authenticate], async (req, res) => {
+router.post("/getActSig", authenticate, async (req, res) => {
+  let pool;
   try {
-    let result = await req.db.query(
-      "select junctionPoint.JID, junctionName from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = " +
-        req.userID
-    );
+    pool = await connection.connect();
+    let result = await pool
+      .request()
+      .query(
+        "select junctionPoint.JID, junctionName from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = " +
+          req.userID
+      );
     result = result.recordset.map(x => {
       return { JID: x.JID, name: x.junctionName };
     });
     let jids = result.map(x => x.JID);
     console.log(result);
      
-    let activeSatusResult = await req.db.query(`
+    let activeSatusResult = await pool.request().query(`
     WITH cte 
      AS (SELECT UID, 
                 Error_Code,
@@ -172,11 +181,12 @@ router.post("/getActSig", [db_connect, authenticate], async (req, res) => {
         error.push(e.name);
       }
     });
-    await sql.close();
+    await pool.close();
     res.send({"running":running, "warning":warning, "error":error});
   } catch (e) {
-    await sql.close();
     console.log(e);
+    await pool.close();
+    res.sendStatus(500).end();
   }
 });
 
