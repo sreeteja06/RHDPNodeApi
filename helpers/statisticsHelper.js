@@ -68,6 +68,8 @@ const getGrpByFirstValue = (Upload_Time, grpBy) => {
   } else if (grpBy === 5) {
     //0 - jan, 1 - feb .......
     return new Date(Upload_Time.toISOString().replace("Z", "")).getMonth();
+  } else if(grpBy === 6) {
+    return new Date(Upload_Time.toISOString().replace("Z", "")).getDate();
   }
 };
 const findAvgTime = (resArr, grpBy) => {
@@ -96,6 +98,8 @@ const findAvgTime = (resArr, grpBy) => {
     n = 24;
   } else if (grpBy === 3) {
     n = 2;
+  } else if (grpBy === 6) {
+    n = 31;
   }
   let length = new Array(n).fill(0);
   let res = new Array(n).fill(0);
