@@ -5,6 +5,20 @@ const { findDensity, findAvgTime } = require("../helpers/statisticsHelper");
 const { authenticate } = require("../middleware/authenticate");
 const { connection } = require("../db/sql_connect");
 
+const getTimeInMinutes = timeF => {
+  if (timeF == 1) {
+    return 15;
+  } else if (timeF == 2) {
+    return 60;
+  } else if (timeF == 3) {
+    return 1440;
+  }else if (timeF == 4) {
+    return 10080;
+  } else if (timeF == 5) {
+    return 43800;
+  }
+}
+
 router.post("/getDensity",  authenticate, async (req, res) => {
   let pool;
   try {
@@ -15,15 +29,7 @@ router.post("/getDensity",  authenticate, async (req, res) => {
     );
     const jids = jidds.recordset.map(x => x.JID);
     let timeF = req.body.timeF;
-    if (timeF == 1) {
-      timeF = 15;
-    } else if (timeF == 2) {
-      timeF = 60;
-    } else if (timeF == 3) {
-      timeF = 10080;
-    } else if (timeF == 4) {
-      timeF = 43800;
-    }
+    timeF = getTimeInMinutes(timeF);
     let result = [];
     result = await pool.request().query(
       `DECLARE @NOWDATE DATETIME;
@@ -87,15 +93,7 @@ router.post("/getAvgTime", authenticate, async (req, res) => {
     }
 
     let timeF = req.body.timeF;
-    if (timeF == 1) {
-      timeF = 15;
-    } else if (timeF == 2) {
-      timeF = 60;
-    } else if (timeF == 3) {
-      timeF = 10080;
-    } else if (timeF == 4) {
-      timeF = 43800;
-    }
+    timeF = getTimeInMinutes(timeF);
     let result = [];
     result = await pool.request().query(
       `DECLARE @NOWDATE DATETIME;
