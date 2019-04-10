@@ -5,11 +5,12 @@ const timerpageApi = ( packets, date_time ) => {
     date_time[0] = new Date(date_time[0].toISOString().replace("Z", ""));
     date_time[1] = new Date(date_time[1].toISOString().replace("Z", ""));
     let new_packets = create_timer(packets);  //make it return number of stages also
-    
-    let LS2 = new_packets[1][new_packets[1].length - 6];
-    let LS3 = new_packets[2][new_packets[2].length - 6];
-
+    let numPhase = new_packets["numPhase"];
+    new_packets = new_packets["new_packets"];
+    let LS2 = new_packets[1][new_packets[1].length - 1];
+    let LS3 = new_packets[2][new_packets[2].length - 1];
     let laststageTime = new Date(LS2*1000);
+    console.log(laststageTime);
     let IT1 = new Date(
       date_time[0].getTime() + laststageTime.getTime()
     );
@@ -34,7 +35,7 @@ const timerpageApi = ( packets, date_time ) => {
     else{
       details_dict["pedTime"] = 0;
       details_dict["trafficPercent"] = Math.round(timeAllocated.reduce((a,b)=>a+b, 0)/2.55)
-      const numPhase = new_packets[0][5]
+      
       let details_list = new Array(new_packets.length).fill({});
       for(let i = 0; i< numPhase;i++){
           road_dict = {}                               //this is the object for every stage
@@ -52,7 +53,7 @@ const timerpageApi = ( packets, date_time ) => {
 };
 
 const create_timer = packets => {
-  let new_packets = [];
+  let new_packets = [], numPhase;
   packets.forEach(element => {
     let a = element;
     let offset_packet = [];
@@ -60,10 +61,11 @@ const create_timer = packets => {
       offset_packet.push(a.substring(j * 8, (j + 1) * 8));
       offset_packet[j] = parseInt(offset_packet[j], 2);
     }
-    offset_packet = offset_packet.slice(6, 6 + offset_packet[5]);
     new_packets.push(offset_packet);
   });
-  return new_packets;
+  numPhase = new_packets[0][5];
+  new_packets = new_packets.map(x => x.slice(6, 6 + numPhase));
+  return {new_packets, numPhase};
 };
 
 const findTimeLeft = (currTime, IT, TA) => {
