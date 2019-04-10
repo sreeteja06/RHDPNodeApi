@@ -60,6 +60,7 @@ const create_timer = packets => {
       offset_packet.push(a.substring(j * 8, (j + 1) * 8));
       offset_packet[j] = parseInt(offset_packet[j], 2);
     }
+    offset_packet = offset_packet.slice(6, 6 + offset_packet[5]);
     new_packets.push(offset_packet);
   });
   return new_packets;
