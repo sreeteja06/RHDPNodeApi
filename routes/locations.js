@@ -4,7 +4,7 @@ const router = express.Router();
 const { connection } = require("../db/sql_connect");
 const { authenticate } = require("../middleware/authenticate");
 const { center_geolocation } = require("../helpers/center_geolocation");
-
+const {timer } = require('../helpers/timerpage');
 router.post("/newJunctionPoint",  authenticate, async (req, res) => {
   let pool;
     try {
@@ -152,5 +152,27 @@ router.post(
     }
   }
 );
+
+router.post('/test/timerpage', async (req, res)=>{
+  let pool;
+  try{
+    pool = await connection.connect();
+    let result = await pool
+      .request()
+      .query(
+        "Select TOP 3 Upload_Time, Message from TrafficInfoPage where UID = 23 order by Upload_Time DESC"
+      );
+    console.log(result.recordset);
+    let packets = result.recordset.map(x => x.Message);
+    let date_time = result.recordset.map(x => x.Upload_Time);
+    let x = timer(packets, date_time);
+    console.log(x);
+    res.send(x);
+  }catch(e){
+    console.log(e);
+    await pool.close();
+    res.sendStatus(500).end();
+  }
+})
 
 module.exports = router;
