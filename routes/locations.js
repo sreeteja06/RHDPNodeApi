@@ -153,7 +153,7 @@ router.post(
   }
 );
 
-router.post('/test/timerpage', async (req, res)=>{
+router.get('/test/timerpage', async (req, res)=>{
   let pool;
   try{
     pool = await connection.connect();
@@ -167,6 +167,7 @@ router.post('/test/timerpage', async (req, res)=>{
     let date_time = result.recordset.map(x => x.Upload_Time);
     let x = timer(packets, date_time);
     console.log(x);
+    await pool.close();
     res.send(x);
   }catch(e){
     console.log(e);
