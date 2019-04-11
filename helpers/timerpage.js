@@ -2,15 +2,14 @@ const timerpageApi = ( packets, date_time ) => {
     let start = new Date().getTime();
     let details_dict = {}
 
-    // date_time[0] = new Date(date_time[0].toISOString().replace("Z", ""));
-    // date_time[1] = new Date(date_time[1].toISOString().replace("Z", ""));
+    date_time[0] = new Date(date_time[0].toISOString().replace("Z", ""));
+    date_time[1] = new Date(date_time[1].toISOString().replace("Z", ""));
     let new_packets = create_timer(packets);  //make it return number of stages also
     let numPhase = new_packets["numPhase"];
     new_packets = new_packets["new_packets"];
     let LS2 = new_packets[1][new_packets[1].length - 1];
     let LS3 = new_packets[2][new_packets[2].length - 1];
     let laststageTime = new Date(LS2*1000);
-    console.log(laststageTime);
     let IT1 = new Date(
       date_time[0].getTime() + laststageTime.getTime()
     );
@@ -19,7 +18,6 @@ const timerpageApi = ( packets, date_time ) => {
       date_time[1].getTime() + laststageTime.getTime()
     );
     let currTime = new Date();
-
     let timeAllocated, timeLeft;
     if (currTime > IT1){
       timeAllocated = new_packets[0];
