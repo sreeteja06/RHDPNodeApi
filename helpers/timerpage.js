@@ -1,9 +1,20 @@
+function convertDateToUTC(date) {
+  return new Date(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    date.getUTCHours(),
+    date.getUTCMinutes(),
+    date.getUTCSeconds()
+  );
+}
+
 const timerpageApi = ( packets, date_time ) => {
     let start = new Date().getTime();
     let details_dict = {}
 
-    // date_time[0] = new Date(date_time[0].toISOString().replace("Z", ""));
-    // date_time[1] = new Date(date_time[1].toISOString().replace("Z", ""));
+    date_time[0] = convertDateToUTC(date_time[0]);
+    date_time[1] = convertDateToUTC(date_time[1]);
     let new_packets = create_timer(packets);  //make it return number of stages also
     let numPhase = new_packets["numPhase"];
     new_packets = new_packets["new_packets"];
@@ -20,8 +31,6 @@ const timerpageApi = ( packets, date_time ) => {
       date_time[1].getTime() + laststageTime.getSeconds()
     );
     let currTime = new Date();
-    
-    currenTime = new Date(currTime.getTime() + 19800000);
     let timeAllocated, timeLeft;
     if (currTime > IT1){
       timeAllocated = new_packets[0];
