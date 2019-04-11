@@ -10,12 +10,14 @@ const timerpageApi = ( packets, date_time ) => {
     let LS2 = new_packets[1][new_packets[1].length - 1];
     let LS3 = new_packets[2][new_packets[2].length - 1];
     let laststageTime = new Date(LS2*1000);
+    console.log(date_time[0]);
     let IT1 = new Date(
-      date_time[0].getTime() + laststageTime.getTime()
+      date_time[0].getTime() + laststageTime.getSeconds()
     );
     laststageTime = new Date(LS3 * 1000);
+    console.log(date_time[1])
     let IT2 = new Date(
-      date_time[1].getTime() + laststageTime.getTime()
+      date_time[1].getTime() + laststageTime.getSeconds()
     );
     let currTime = new Date();
     let timeAllocated, timeLeft;
@@ -67,6 +69,8 @@ const create_timer = packets => {
 };
 
 const findTimeLeft = (currTime, IT, TA) => {
+  console.log(currTime);
+  console.log(IT);
   let timeLeft = new Array(TA.length).fill(0);
   let diff = (currTime - IT)/1000;
   for(let i = 0; i < TA.length; i++){
