@@ -28,6 +28,8 @@ const timerpageApi = ( packets, date_time ) => {
     let IT2 = new Date(
       date_time[1].getTime() + laststageTime.getSeconds()
     );
+    console.log("IT1: " + IT1);
+    console.log("IT2: " + IT2);
     let currTime = new Date();
     currTime = new Date(currTime.getTime() + 19800000);
     let timeAllocated, timeLeft;
@@ -39,8 +41,8 @@ const timerpageApi = ( packets, date_time ) => {
       timeAllocated = new_packets[1];
       timeLeft = findTimeLeft(currTime, IT2, timeAllocated);
     }
-    console.log(timeAllocated);
-    console.log(timeLeft);
+    console.log("timeAllocated: "+timeAllocated);
+    console.log("timeLeft: "+timeLeft);
     if ((timeLeft.reduce((a, b) => a + b, 0)) == 0){
       return false;
     }
@@ -81,9 +83,7 @@ const create_timer = packets => {
 };
 
 const findTimeLeft = (currTime, IT, TA) => {
-  console.log(currTime - IT);
-  console.log(currTime);
-  console.log(IT);
+  console.log("TA: "+TA);
   let timeLeft = new Array(TA.length).fill(0);
   let diff = (currTime - IT)/1000;
   for(let i = 0; i < TA.length; i++){
