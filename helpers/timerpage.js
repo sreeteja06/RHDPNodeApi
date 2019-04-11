@@ -80,6 +80,7 @@ const create_timer = packets => {
 };
 
 const findTimeLeft = (currTime, IT, TA) => {
+  currTime = new Date(currTime.getTime() + 19800000);
   console.log(currTime);
   console.log(IT);
   let timeLeft = new Array(TA.length).fill(0);
