@@ -153,27 +153,45 @@ router.post(
   }
 );
 
-router.get('/test/timerpage', async (req, res)=>{
+router.get("/timerpage", authenticate, async (req, res) => {
   let pool;
-  try{
+  try {
     pool = await connection.connect();
+    let jidds = await pool
+      .request()
+      .query(
+        "select junctionPoint.JID from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = " +
+          req.userID
+      );
+    jidds = jidds.recordset.map(x => x.JID);
+    const jids = req.body.interID;
+    if (
+      jidds.find(e => {
+        return e == jids;
+      }) === undefined
+    ) {
+      throw "401";
+    }
     let result = await pool
       .request()
       .query(
-        "Select TOP 3 Upload_Time, Message from TrafficInfoPage where UID = 23 order by Upload_Time DESC"
+        `Select TOP 3 Upload_Time, Message from TrafficInfoPage where UID = ${jids.toString()} order by Upload_Time DESC`
       );
-    console.log(result.recordset);
     let packets = result.recordset.map(x => x.Message);
     let date_time = result.recordset.map(x => x.Upload_Time);
+    if(packets.length<3){
+      throw "less than 3 packets";
+    }
     let x = timer(packets, date_time);
     console.log(x);
     await pool.close();
     res.send(x);
-  }catch(e){
+  } catch (e) {
     console.log(e);
     await pool.close();
     res.sendStatus(500).end();
   }
-})
+});
+
 
 module.exports = router;
