@@ -24,11 +24,11 @@ const timerpageApi = ( packets, date_time ) => {
     console.log("ls3: " + LS3);
     let laststageTime = new Date(LS2*1000);
     let IT1 = new Date(
-      date_time[0].getTime() + laststageTime.getSeconds()
+      date_time[0].getTime() + laststageTime.getTime()
     );
     laststageTime = new Date(LS3 * 1000);
     let IT2 = new Date(
-      date_time[1].getTime() + laststageTime.getSeconds()
+      date_time[1].getTime() + laststageTime.getTime()
     );
     console.log("IT1: " + IT1);
     console.log("IT2: " + IT2);
