@@ -29,6 +29,7 @@ const timerpageApi = ( packets, date_time ) => {
       date_time[1].getTime() + laststageTime.getSeconds()
     );
     let currTime = new Date();
+    currTime = new Date(currTime.getTime() + 19800000);
     let timeAllocated, timeLeft;
     if (currTime > IT1){
       timeAllocated = new_packets[0];
@@ -80,7 +81,6 @@ const create_timer = packets => {
 };
 
 const findTimeLeft = (currTime, IT, TA) => {
-  currTime = new Date(currTime.getTime() + 19800000);
   console.log(currTime - IT);
   console.log(currTime);
   console.log(IT);
