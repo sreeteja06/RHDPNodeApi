@@ -2,8 +2,8 @@ const timerpageApi = ( packets, date_time ) => {
     let start = new Date().getTime();
     let details_dict = {}
 
-    date_time[0] = new Date(date_time[0].toISOString().replace("Z", ""));
-    date_time[1] = new Date(date_time[1].toISOString().replace("Z", ""));
+    // date_time[0] = new Date(date_time[0].toISOString().replace("Z", ""));
+    // date_time[1] = new Date(date_time[1].toISOString().replace("Z", ""));
     let new_packets = create_timer(packets);  //make it return number of stages also
     let numPhase = new_packets["numPhase"];
     new_packets = new_packets["new_packets"];
