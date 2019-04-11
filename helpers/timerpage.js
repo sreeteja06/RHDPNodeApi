@@ -83,8 +83,7 @@ const create_timer = packets => {
 
 const findTimeLeft = (currTime, IT, TA) => {
   currTime = new Date(currTime.getTime() + 19800000);
-  console.log(currTime);
-  console.log(IT);
+  console.log(currTime - IT);
   let timeLeft = new Array(TA.length).fill(0);
   let diff = (currTime - IT)/1000;
   for(let i = 0; i < TA.length; i++){
