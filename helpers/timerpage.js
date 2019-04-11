@@ -20,6 +20,8 @@ const timerpageApi = ( packets, date_time ) => {
     new_packets = new_packets["new_packets"];
     let LS2 = new_packets[1][new_packets[1].length - 1];
     let LS3 = new_packets[2][new_packets[2].length - 1];
+    console.log("ls2: " + LS2);
+    console.log("ls3: " + LS3);
     let laststageTime = new Date(LS2*1000);
     let IT1 = new Date(
       date_time[0].getTime() + laststageTime.getSeconds()
