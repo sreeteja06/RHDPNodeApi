@@ -162,7 +162,6 @@ router.get('/test/timerpage', async (req, res)=>{
       .query(
         "Select TOP 3 Upload_Time, Message from TrafficInfoPage where UID = 23 order by Upload_Time DESC"
       );
-    console.log(result.recordset);
     let packets = result.recordset.map(x => x.Message);
     let date_time = result.recordset.map(x => x.Upload_Time);
     let x = timer(packets, date_time);

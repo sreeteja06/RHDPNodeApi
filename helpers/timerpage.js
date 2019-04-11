@@ -40,6 +40,8 @@ const timerpageApi = ( packets, date_time ) => {
       timeAllocated = new_packets[1];
       timeLeft = findTimeLeft(currTime, IT2, timeAllocated);
     }
+    console.log(timeAllocated);
+    console.log(timeLeft);
     if ((timeLeft.reduce((a, b) => a + b, 0)) == 0){
       return false;
     }
