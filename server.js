@@ -7,6 +7,7 @@ const cors = require("cors");
 const userRoute = require('./routes/user');
 const locationRoute = require('./routes/locations');
 const statisticsRoute = require('./routes/statistics');
+const reportsRoute = require('./routes/reports');
 
 let app = express();
 app.use(cors());
@@ -14,6 +15,7 @@ app.use(bodyParser.json());
 app.use('/user', userRoute);
 app.use('/', locationRoute);
 app.use('/statistics', statisticsRoute);
+app.use("/", reportsRoute);
 const port = process.env.PORT || 1337;
 
 app.get("/", (req, res) => {

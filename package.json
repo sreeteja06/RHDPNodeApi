@@ -25,8 +25,11 @@
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "express": "^4.16.4",
+    "html-pdf": "^2.2.0",
     "jsonwebtoken": "^8.5.1",
     "mssql": "^5.0.3",
+    "nodemailer": "^6.1.1",
+    "phantomjs-prebuilt": "^2.1.16",
     "tedious": "^5.0.3"
   }
 }

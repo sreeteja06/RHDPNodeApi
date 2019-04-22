@@ -153,7 +153,7 @@ router.post(
   }
 );
 
-router.get("/timerpage", authenticate, async (req, res) => {
+router.post("/timerpage", authenticate, async (req, res) => {
   let pool;
   try {
     pool = await connection.connect();

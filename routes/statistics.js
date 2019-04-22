@@ -11,11 +11,11 @@ const getTimeInMinutes = timeF => {
   } else if (timeF == 2) {
     return 60;
   } else if (timeF == 3) {
-    return 1440;
+    return "concat(format(@NOWDATE, 'yyyy-MM-dd'), ' 00:00:00.000')";
   }else if (timeF == 4) {
-    return 10080;
+    return "concat(format(@NOWDATE, 'yyyy-MM'), '-', format(DATEADD(dd, -(DATEPART(dw, @NOWDATE)-1), @NOWDATE), 'dd'), ' 00:00:00.000')";
   } else if (timeF == 5) {
-    return 43800;
+    return "concat(format(@NOWDATE, 'yyyy-MM'), '-01 00:00:00.000')";
   }
 }
 
@@ -29,16 +29,26 @@ router.post("/getDensity",  authenticate, async (req, res) => {
     );
     const jids = jidds.recordset.map(x => x.JID);
     let timeF = req.body.timeF;
-    timeF = getTimeInMinutes(timeF);
+    let timeCondition = getTimeInMinutes(timeF);
     let result = [];
-    result = await pool.request().query(
-      `DECLARE @NOWDATE DATETIME;
-      set @NOWDATE = DATEADD(HH, +5, GETDATE());
-      set @NOWDATE = DATEADD(n, +30, @NOWDATE);
-      set @NOWDATE = DATEADD(mi, -${timeF}, @NOWDATE);
-      select * from LogDelhi where UID in (${jids.toString()}) 
-      and Upload_Time > @NOWDATE`
-    );
+    if (timeF == 3 || timeF == 4 || timeF == 5) {
+      result = await pool.request().query(
+        `DECLARE @NOWDATE DATETIME;
+        set @NOWDATE = DATEADD(HH, +5, GETDATE());
+        set @NOWDATE = DATEADD(n, +30, @NOWDATE);
+        select * from LogDelhi where UID in (${jids.toString()}) 
+        and Upload_Time > ${timeCondition}`
+      );
+    } else {
+      result = await pool.request().query(
+        `DECLARE @NOWDATE DATETIME;
+        set @NOWDATE = DATEADD(HH, +5, GETDATE());
+        set @NOWDATE = DATEADD(n, +30, @NOWDATE);
+        set @NOWDATE = DATEADD(mi, -${timeCondition}, @NOWDATE);
+        select * from LogDelhi where UID in (${jids.toString()}) 
+        and Upload_Time > @NOWDATE`
+      );
+    }
     let parsedObj = {};
     jids.forEach(e => {
       parsedObj[e] = [];
@@ -93,16 +103,27 @@ router.post("/getAvgTime", authenticate, async (req, res) => {
     }
 
     let timeF = req.body.timeF;
-    timeF = getTimeInMinutes(timeF);
+    let timeCondition = getTimeInMinutes(timeF);
     let result = [];
-    result = await pool.request().query(
-      `DECLARE @NOWDATE DATETIME;
-      set @NOWDATE = DATEADD(HH, +5, GETDATE());
-      set @NOWDATE = DATEADD(n, +30, @NOWDATE);
-      set @NOWDATE = DATEADD(mi, -${timeF}, @NOWDATE);
-      select * from LogDelhi where UID in (${jids.toString()}) 
-      and Upload_Time > @NOWDATE`
-    );
+    if(timeF == 3 || timeF == 4 || timeF == 5){
+      result = await pool.request().query(
+        `DECLARE @NOWDATE DATETIME;
+        set @NOWDATE = DATEADD(HH, +5, GETDATE());
+        set @NOWDATE = DATEADD(n, +30, @NOWDATE);
+        select * from LogDelhi where UID in (${jids.toString()}) 
+        and Upload_Time > ${timeCondition}`
+      );
+    }
+    else{
+      result = await pool.request().query(
+        `DECLARE @NOWDATE DATETIME;
+        set @NOWDATE = DATEADD(HH, +5, GETDATE());
+        set @NOWDATE = DATEADD(n, +30, @NOWDATE);
+        set @NOWDATE = DATEADD(mi, -${timeCondition}, @NOWDATE);
+        select * from LogDelhi where UID in (${jids.toString()}) 
+        and Upload_Time > @NOWDATE`
+      );
+    }
     result = result.recordset.map(e => {
       return { Upload_Time: e.Upload_Time, Message: e.Message };
     });

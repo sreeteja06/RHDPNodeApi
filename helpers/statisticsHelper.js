@@ -19,10 +19,9 @@ const getGrpByFirstValue = (Upload_Time, grpBy) => {
   if (grpBy === 1) {
     return new Date(Upload_Time.toISOString().replace("Z", "")).getHours();
   } else if (grpBy === 2) {
-    //0 - morning, 1 - afternoon, 2 - evening
+    //0 - morning, 1 - afternoon, 2 - evening, 3 - night
     let x = new Date(Upload_Time.toISOString().replace("Z", "")).getHours();
     if (
-      x === 5 ||
       x === 6 ||
       x === 7 ||
       x === 8 ||
@@ -36,16 +35,21 @@ const getGrpByFirstValue = (Upload_Time, grpBy) => {
       x === 13 ||
       x === 14 ||
       x === 15 ||
-      x === 16 ||
-      x === 17 ||
-      x === 18 ||
-      x === 19
+      x === 16
     ) {
       return 1;
-    } else {
+    } else if (
+      x === 17 ||
+      x === 18 ||
+      x === 19 ||
+      x === 20 ||
+      x === 21
+    ) {
       return 2;
+    }else {
+      return 3;
     }
-  }else if (grpBy === 3) {
+  } else if (grpBy === 3) {
     //0 - peak, 1 - off -peak
     let x = new Date(Upload_Time.toISOString().replace("Z", "")).getHours();
     if (
@@ -69,7 +73,7 @@ const getGrpByFirstValue = (Upload_Time, grpBy) => {
     //0 - jan, 1 - feb .......
     return new Date(Upload_Time.toISOString().replace("Z", "")).getMonth();
   } else if(grpBy === 6) {
-    return new Date(Upload_Time.toISOString().replace("Z", "")).getDate();
+    return (new Date(Upload_Time.toISOString().replace("Z", "")).getDate())-1;
   }
 };
 const findAvgTime = (resArr, grpBy) => {
@@ -93,7 +97,7 @@ const findAvgTime = (resArr, grpBy) => {
   } else if (grpBy === 4) {
     n = 7;
   } else if (grpBy === 2) {
-    n = 3;
+    n = 4;
   } else if (grpBy === 1) {
     n = 24;
   } else if (grpBy === 3) {
