@@ -54,7 +54,6 @@ router.post("/getDensity",  authenticate, async (req, res) => {
       parsedObj[e] = [];
     });
     let resObj = {};
-    console.log(result.recordset.length);
     result.recordset.forEach(e => {
       parsedObj[e.UID].push(e.Message);
     });
@@ -165,7 +164,6 @@ router.post("/getActSig", authenticate, async (req, res) => {
       return { JID: x.JID, name: x.junctionName };
     });
     let jids = result.map(x => x.JID);
-    console.log(result);
      
     let activeSatusResult = await pool.request().query(`
     WITH cte 

@@ -37,7 +37,6 @@ router.post("/newJunctionPoint",  authenticate, async (req, res) => {
         result = await pool.request().query(
             "exec addUserAccess @inUserId = " + req.userID + ", @InJID = " + JID
         );
-        // console.log(result);
         result = await pool.request().query(
             "exec addUserAccess @inUserId = 1, @InJID = " + JID
         );
@@ -49,7 +48,7 @@ router.post("/newJunctionPoint",  authenticate, async (req, res) => {
     } catch (e) {
         console.log(e);
         await pool.close();
-        res.status(401).send(e);
+        res.status(500).send(e);
     }
 });
 
@@ -86,7 +85,6 @@ router.get("/getLocations", authenticate, async (req, res) => {
     result.recordset.forEach(e => {
       jids.push(e.JID[0]);
     });
-    // console.log(jids);
     let activeSatusResult = await pool.request().query(`
     WITH cte 
      AS (SELECT UID, 
@@ -107,14 +105,12 @@ router.get("/getLocations", authenticate, async (req, res) => {
       temp = activeSatusResult.recordset.find(h => {
         return h.UID === e.JID;
       });
-      // console.log(temp);
       if (temp != undefined) {
         e["activeStatus"] = temp.ERROR_CODE;
       } else {
         e["activeStatus"] = 2;
       }
     });
-    // console.log(activeSatusResult.recordset);
     res.send({ centerPoints, doc: result.recordset });
   } catch (e) {
     console.log(e);
@@ -183,7 +179,6 @@ router.post("/timerpage", authenticate, async (req, res) => {
       throw "less than 3 packets";
     }
     let x = timer(packets, date_time);
-    console.log(x);
     await pool.close();
     res.send(x);
   } catch (e) {

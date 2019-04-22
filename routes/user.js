@@ -10,10 +10,12 @@ router.post("/signUp", (req, res) => {
     let password, pool;
     bcrypt.genSalt(10, (err, salt) => {
         if (err) {
+            console.log(err);
             res.send(500).send(err);
         }
         bcrypt.hash(req.body.password, salt, async (err, hash) => {
             if (err) {
+                console.log(err);
                 res.send(500).send(err);
             }
             password = hash;
@@ -54,7 +56,7 @@ router.post("/signUp", (req, res) => {
             } catch (err) {
                 console.log(err);
                 await pool.close();
-                res.send(err);
+                res.status(500).send(err);
             }
         });
     });
@@ -98,15 +100,15 @@ router.post("/login", async (req, res) => {
                 "')"
             );
             const decoded = decodeAuthToken(token);
-            // console.log(result);
             await pool.close();
             res.send({ userID: userID, name, branch, exp: decoded.exp, token });
           } else {
+            console.error("bcrypt compare:"+err);
             await pool.close();
-            res.send(401);
+            res.status(401).end();
           }
         } catch (e) {
-          console.log(e);
+          console.log("bcrypt compare:"+e);
           await pool.close();
           res.status(401).send(e);
         }
@@ -115,7 +117,7 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.log(err);
     await pool.close();
-    res.status(401).end();
+    res.status(500).end();
   }
 });
 
