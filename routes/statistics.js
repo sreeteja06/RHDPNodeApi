@@ -73,6 +73,7 @@ router.post("/getDensity",  authenticate, async (req, res) => {
       temp["avgDensity"] = resObj[key];
       formatRes.push(temp);
     }
+    res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
     res.send(formatRes);
   } catch (e) {
     console.log(e);
@@ -138,6 +139,7 @@ router.post("/getAvgTime", authenticate, async (req, res) => {
         return [];
       }
     });
+    res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
     res.send(Sendres);
   } catch (e) {
     console.log(e);
@@ -199,6 +201,7 @@ router.post("/getActSig", authenticate, async (req, res) => {
       }
     });
     await pool.close();
+    res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
     res.send({"running":running, "warning":warning, "error":error});
   } catch (e) {
     console.log(e);

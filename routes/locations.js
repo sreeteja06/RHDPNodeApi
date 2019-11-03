@@ -44,6 +44,7 @@ router.post("/newJunctionPoint",  authenticate, async (req, res) => {
             "select * from junctionPoint where JID = " + JID
         );
         await pool.close();
+        res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
         res.send(result.recordset[0]);
     } catch (e) {
         console.log(e);
@@ -62,6 +63,7 @@ router.get("/getUserJIDS", authenticate, async(req,res)=>{
     );
     jids = jids.recordset.map(x => { return {JID: x.JID, name: x.junctionName}});
     pool.close();
+    res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
     res.send(jids);
   } catch (e) {
     console.log(e);
@@ -111,6 +113,7 @@ router.get("/getLocations", authenticate, async (req, res) => {
         e["activeStatus"] = 2;
       }
     });
+    res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
     res.send({ centerPoints, doc: result.recordset });
   } catch (e) {
     console.log(e);
@@ -139,6 +142,7 @@ router.post(
               req.body.JID
           );
         await pool.close();
+        res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
         res.send(result);
       } catch (e) {
         console.log(e);
@@ -180,6 +184,7 @@ router.post("/timerpage", authenticate, async (req, res) => {
     }
     let x = timer(packets, date_time);
     await pool.close();
+    res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
     res.send(x);
   } catch (e) {
     console.log(e);

@@ -50,6 +50,7 @@ router.post("/signUp", (req, res) => {
                     "')"
                 );
                 await pool.close();
+                res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
                 res
                     .header("x-auth", token)
                     .send({ userID: userID, email: req.body.email });
@@ -101,6 +102,7 @@ router.post("/login", async (req, res) => {
             );
             const decoded = decodeAuthToken(token);
             await pool.close();
+            res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
             res.send({ userID: userID, name, branch, exp: decoded.exp, token });
           } else {
             console.error("bcrypt compare:"+err);
@@ -135,6 +137,7 @@ router.delete(
         "exec removeToken @inToken = '" + req.token + "'"
       );
       await pool.close();
+      res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
       res.send(result);
     } catch (e) {
         console.log(e);
@@ -145,6 +148,7 @@ router.delete(
 );
 
 router.get("/me",  authenticate, async (req, res) => {
+  res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
   res.send({ userID: req.userID });
 });
 

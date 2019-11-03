@@ -3,6 +3,8 @@ require("./config/config");
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const morgan = require('morgan');
+const helmet = require('helmet')
 
 const userRoute = require('./routes/user');
 const locationRoute = require('./routes/locations');
@@ -12,6 +14,10 @@ const reportsRoute = require('./routes/report');
 let app = express();
 app.use(cors());
 app.use(bodyParser.json());
+app.use(helmet.xssFilter());
+// app.use(helmet()) //enable in production
+app.disable('x-powered-by')
+app.use(morgan('dev'));
 app.use('/user', userRoute);
 app.use('/', locationRoute);
 app.use('/statistics', statisticsRoute);
