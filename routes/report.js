@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
-const pdf = require("html-pdf");
+// const pdf = require("html-pdf");
 var fs = require("fs");
 var {PythonShell} = require("python-shell");
 
