@@ -1,7 +1,7 @@
---create database rhdpTest;
---go
+-- create database rhdpTest;
+-- go
 
-use rhdpTest;
+use rhdp;
 go
 
 create table junctionPoint 

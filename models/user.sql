@@ -4,7 +4,7 @@
 -- create database rhdpTest;
 -- GO
 
-use rhdpTest;
+use rhdp;
 GO
 
 create table users(

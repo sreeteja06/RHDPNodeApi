@@ -6,6 +6,14 @@ const { connection } = require('../db/sql_connect');
 const { generateAuthToken, decodeAuthToken } = require("../helpers/authToken");
 const { authenticate } = require("../middleware/authenticate");
 
+/***
+ * @description this api endpoint is used for signup of an new user, and logs him by creating the token
+ * @param {string} email - req.body.email #requires to be unique
+ * @param {string} password - req.body.password #the password is hashed and saved into table
+ * @param {string} name - req.body.name
+ * @param {string} phone - req.body.phone
+ * @returns {Object} userId and Email #after successfully creating the auth token which expires in 12hr it returns the userid and email
+ */
 router.post("/signUp", (req, res) => {
     let password, pool;
     bcrypt.genSalt(10, (err, salt) => {
@@ -63,6 +71,12 @@ router.post("/signUp", (req, res) => {
     });
 });
 
+/***
+ * @description this api endpoint is used for login
+ * @param {string} email - req.body.email
+ * @param {string} password - req.body.password 
+ * @returns {Object} userID, name, branch, exp, token #after successfully creating the auth token which expires in 12hr it returns the userid and email
+ */
 router.post("/login", async (req, res) => {
   const password = req.body.password;
   const email = req.body.email;
@@ -73,7 +87,7 @@ router.post("/login", async (req, res) => {
     });
     pool = await connection.connect();
     let result = await pool.request().query(
-      "select userID, password, name, branch from users where email = '" +
+      "select userID, password, name from users where email = '" +
         email +
         "'"
     );
@@ -82,7 +96,6 @@ router.post("/login", async (req, res) => {
     }
     const userID = result.recordset[0].userID;
     const name = result.recordset[0].name;
-    const branch = result.recordset[0].branch;
     await pool.request().query("delete from tokens where userID = '" + userID + "'");
     bcrypt.compare(
       password,
@@ -103,7 +116,7 @@ router.post("/login", async (req, res) => {
             const decoded = decodeAuthToken(token);
             await pool.close();
             res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
-            res.send({ userID: userID, name, branch, exp: decoded.exp, token });
+            res.send({ userID: userID, name, exp: decoded.exp, token });
           } else {
             console.error("bcrypt compare:"+err);
             await pool.close();
@@ -123,6 +136,10 @@ router.post("/login", async (req, res) => {
   }
 });
 
+/***
+ * @description this api endpoint is used for logout
+ * @param {string} token - x-auth header
+ */
 router.delete(
   "/me/logout",
   authenticate,
