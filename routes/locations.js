@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const { connection } = require("../db/sql_connect");
+const { connection2 } = require("../db/sql_connect2");
 const { authenticate } = require("../middleware/authenticate");
 const { center_geolocation } = require("../helpers/center_geolocation");
 const {timer } = require('../helpers/timerpage');
@@ -37,8 +38,9 @@ router.post("/newJunctionPoint",  authenticate, async (req, res) => {
         result = await pool.request().query(
             "exec addUserAccess @inUserId = " + req.userID + ", @InJID = " + JID
         );
+        //change the @inUserId according to the userId of who is admin of the application, because eery juntion point added he can access it
         result = await pool.request().query(
-            "exec addUserAccess @inUserId = 1, @InJID = " + JID
+            "exec addUserAccess @inUserId = 2, @InJID = " + JID
         );
         result = await pool.request().query(
             "select * from junctionPoint where JID = " + JID
@@ -74,8 +76,10 @@ router.get("/getUserJIDS", authenticate, async(req,res)=>{
 
 router.get("/getLocations", authenticate, async (req, res) => {
   let pool;
+  let pool2
   try {
     pool = await connection.connect();
+    pool2 = await connection2.connect();
     req.on("close", async err => {
       await pool.close();
     });
@@ -87,7 +91,7 @@ router.get("/getLocations", authenticate, async (req, res) => {
     result.recordset.forEach(e => {
       jids.push(e.JID[0]);
     });
-    let activeSatusResult = await pool.request().query(`
+    let activeSatusResult = await pool2.request().query(`
     WITH cte 
      AS (SELECT UID, 
                 Error_Code,
@@ -102,6 +106,7 @@ router.get("/getLocations", authenticate, async (req, res) => {
     ORDER BY UID
     `);
     await pool.close();
+    await pool2.close();
     result.recordset.forEach(e => {
       e.JID = e.JID[0];
       temp = activeSatusResult.recordset.find(h => {
@@ -118,6 +123,7 @@ router.get("/getLocations", authenticate, async (req, res) => {
   } catch (e) {
     console.log(e);
     await pool.close();
+    await pool2.close();
     res.status(500).send(e);
   }
 });
@@ -155,8 +161,10 @@ router.post(
 
 router.post("/timerpage", authenticate, async (req, res) => {
   let pool;
+  let pool2;
   try {
     pool = await connection.connect();
+    pool2 = await connection2.connect();
     let jidds = await pool
       .request()
       .query(
@@ -172,7 +180,7 @@ router.post("/timerpage", authenticate, async (req, res) => {
     ) {
       throw "401";
     }
-    let result = await pool
+    let result = await pool2
       .request()
       .query(
         `Select TOP 3 Upload_Time, Message from TrafficInfoPage where UID = ${jids.toString()} order by Upload_Time DESC`
@@ -184,11 +192,13 @@ router.post("/timerpage", authenticate, async (req, res) => {
     }
     let x = timer(packets, date_time);
     await pool.close();
+    await pool2.close();
     res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
     res.send(x);
   } catch (e) {
     console.log(e);
     await pool.close();
+    await pool2.close();
     res.sendStatus(500).end();
   }
 });

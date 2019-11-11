@@ -130,9 +130,13 @@ router.post("/login", async (req, res) => {
       }
     );
   } catch (err) {
-    console.log(err);
-    await pool.close();
-    res.status(500).end();
+    if(err === "no email found"){
+      res.status(401).send({err: "no email found"});
+    }else{
+      console.log(err);
+      await pool.close();
+      res.status(500).end();
+    }
   }
 });
 

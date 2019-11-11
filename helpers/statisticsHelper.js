@@ -15,6 +15,20 @@ const DecodeSinglePacket = packet => {
   }
   return offset_packet;
 };
+/**
+grpBy = Group By
+​
+1 for hour
+ -> Hour of the 'Upload_Time'
+2 for Morning/Afternoon/Evening
+/Night -> Morning: [6,7,8,9,10,11], Afternoon: [12,13,14,15,16], Evening: [17,18,19,20,21], Night: [22,23,0,1,2,3,4,5]
+3 for Peak/Off-Peak
+/Night -> Peak: [8,9,10,11,17,18,19,20], Off-Peak: [6,7,12,13,14,15,16,21], Night: [22,23,0,1,2,3,4,5]
+4 for Day -> Day of Upload_Time
+ (1,2...31)
+5 for Month -> Month of Upload_Time (January,...December)
+6 for Day_Of_Week -> Day of Week of Upload_Time (Monday, ...Sunday)
+*/
 const getGrpByFirstValue = (Upload_Time, grpBy) => {
   if (grpBy === 1) {
     return new Date(Upload_Time.toISOString().replace("Z", "")).getHours();
