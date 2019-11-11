@@ -157,7 +157,7 @@ router.post("/getAvgTime", authenticate, async (req, res) => {
     console.log(e);
     await pool.close();
     if (e == 401) {
-      res.sendStatus(401).end();
+      res.sendStatus(401).send({err: "unauthorized Junction ID"});
     } else {
       res.sendStatus(500).end();
     }

@@ -199,7 +199,11 @@ router.post("/timerpage", authenticate, async (req, res) => {
     console.log(e);
     await pool.close();
     await pool2.close();
-    res.sendStatus(500).end();
+    if (e == 401) {
+      res.sendStatus(401).send({err: "unauthorized Junction ID"});
+    } else {
+      res.sendStatus(500).end();
+    }
   }
 });
 

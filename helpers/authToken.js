@@ -14,7 +14,7 @@ const decodeAuthToken = token => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     return decoded;
   } catch (e) {
-    throw e;
+    return new Error("token validation failed")
   }
 };
 

@@ -7,6 +7,9 @@ var authenticate = async (req, res, next) => {
 	let pool;
 	//checking of token validity and others are removed for now i.e. for develpment purpose
 	try{
+		if(!token){
+			throw "No token Sent"
+		}
 		// const decoded = jwt.verify(token, process.env.JWT_SECRET);
 		// console.log(decoded);
 		pool = await connection.connect();
