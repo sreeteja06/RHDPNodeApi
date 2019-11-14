@@ -201,7 +201,10 @@ router.post("/timerpage", authenticate, async (req, res) => {
     await pool2.close();
     if (e == 401) {
       res.sendStatus(401).send({err: "unauthorized Junction ID"});
-    } else {
+    } else if(e === "less than 3 packets"){
+      res.sendStatus(401).send({err: "less than three packets in trafficinfopage table"});
+    }
+    else {
       res.sendStatus(500).end();
     }
   }

@@ -79,8 +79,8 @@ const create_timer = packets => {
     }
     new_packets.push(offset_packet);
   });
-  numPhase = new_packets[0][5];
-  new_packets = new_packets.map(x => x.slice(6, 6 + numPhase));
+  numPhase = new_packets[0].length;
+  // new_packets = new_packets.map(x => x.slice(6, 6 + numPhase));
   return { new_packets, numPhase };
 };
 

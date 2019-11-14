@@ -13,10 +13,10 @@ const statisticsRoute = require('./routes/statistics');
 let app = express();
 app.use(cors());
 app.use(bodyParser.json());
-app.use(helmet.xssFilter());
-// app.use(helmet()) //enable in production
+// app.use(helmet.xssFilter());
+app.use(helmet()) //enable in production
 app.disable('x-powered-by')
-app.use(morgan('dev'));
+app.use(morgan(':method :url :status :response-time ms - :remote-addr'));
 app.use('/user', userRoute);
 app.use('/', locationRoute);
 app.use('/statistics', statisticsRoute);
