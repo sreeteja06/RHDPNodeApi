@@ -88,11 +88,7 @@ router.post("/getDensity",  authenticate, async (req, res) => {
     console.log(e);
     await pool.close();
     res.sendStatus(500).end();
-  }finally{
-		if(pool){
-			await pool.close();
-		}
-	}
+  }
 });
 
 router.post("/getAvgTime", authenticate, async (req, res) => {
@@ -165,11 +161,7 @@ router.post("/getAvgTime", authenticate, async (req, res) => {
     } else {
       res.sendStatus(500).end();
     }
-  }finally{
-		if(pool){
-			await pool.close();
-		}
-	}
+  }
 });
 
 router.post("/getActSig", authenticate, async (req, res) => {
@@ -231,14 +223,7 @@ router.post("/getActSig", authenticate, async (req, res) => {
     await pool.close();
     await pool2.close();
     res.sendStatus(500).end();
-  }finally{
-		if(pool){
-			await pool.close();
-    }
-    if(pool2){
-			await pool2.close();
-		}
-	}
+  }
 });
 
 module.exports = router;

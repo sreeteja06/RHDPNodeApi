@@ -16,16 +16,13 @@ var authenticate = async (req, res, next) => {
 		let result = await pool.request().query("exec findByToken @inToken = '"+ token +"'" );
 		req.userID = result.recordset[0].userID;
 		req.token = token;
-		await pool.close();
+		pool.close();
 		next();
 	}catch(e){
 		console.log(e);
 		await pool.close();
 		res.status(401).send(e);
-	}finally{
-		if(pool){
-			await pool.close();
-		}
+		next();
 	}
 };
 

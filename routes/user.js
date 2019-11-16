@@ -66,10 +66,6 @@ router.post("/signUp", (req, res) => {
                 console.log(err);
                 await pool.close();
                 res.status(500).send(err);
-            }finally{
-              if(pool){
-                await pool.close();
-              }
             }
         });
     });
@@ -142,10 +138,6 @@ router.post("/login", async (req, res) => {
       await pool.close();
       res.status(500).end();
     }
-  }finally{
-    if(pool){
-      await pool.close();
-    }
   }
 });
 
@@ -173,10 +165,6 @@ router.delete(
         console.log(e);
       await pool.close();
       res.status(500).send(e);
-    }finally{
-      if(pool){
-        await pool.close();
-      }
     }
   }
 );
