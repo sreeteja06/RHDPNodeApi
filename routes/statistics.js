@@ -3,8 +3,8 @@ const router = express.Router();
 
 const { findDensity, findAvgTime } = require("../helpers/statisticsHelper");
 const { authenticate } = require("../middleware/authenticate");
-const { connection } = require("../db/sql_connect");
-const { connection2 } = require("../db/sql_connect2");
+const { poolPromise } = require("../db/sql_connect");
+const { poolPromise2 } = require("../db/sql_connect2");
 
 const getTimeInMinutes = timeF => {
   //past 15 mins
@@ -29,7 +29,7 @@ router.post("/getDensity",  authenticate, async (req, res) => {
   let pool;
   try {
     console.log("Get density endpoint");
-    pool = await connection.connect();
+    pool = await poolPromise;
     let jidds = await pool.request().query(
       "select junctionPoint.JID, junctionName from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = " +
         req.userID
@@ -71,7 +71,6 @@ router.post("/getDensity",  authenticate, async (req, res) => {
         resObj[key] = findDensity(parsedObj[key]);
       }
     }
-    await pool.close();
     let formatRes = [];
     for (let key in resObj) {
       let temp = {};
@@ -86,7 +85,6 @@ router.post("/getDensity",  authenticate, async (req, res) => {
     res.send(formatRes);
   } catch (e) {
     console.log(e);
-    await pool.close();
     res.sendStatus(500).end();
   }
 });
@@ -94,7 +92,7 @@ router.post("/getDensity",  authenticate, async (req, res) => {
 router.post("/getAvgTime", authenticate, async (req, res) => {
   let pool;
   try {
-    pool = await connection.connect();
+    pool = await poolPromise;
     let jidds = await pool
       .request()
       .query(
@@ -108,7 +106,7 @@ router.post("/getAvgTime", authenticate, async (req, res) => {
         return e == jids;
       }) === undefined
     ) {
-      throw "401";
+      throw "203";
     }
     //timeF - timeframe information is in getTimeInMinutes function
     let timeF = req.body.timeF;
@@ -140,7 +138,6 @@ router.post("/getAvgTime", authenticate, async (req, res) => {
     });
     //grpBy use in statisticdHelper page
     Sendres = findAvgTime(result, req.body.grpBy);
-    await pool.close();
     Sendres = Sendres.map(e => {
       const temp = e.find(x => {
         return x != null;
@@ -155,9 +152,8 @@ router.post("/getAvgTime", authenticate, async (req, res) => {
     res.send(Sendres);
   } catch (e) {
     console.log(e);
-    await pool.close();
-    if (e == 401) {
-      res.sendStatus(401).send({err: "unauthorized Junction ID"});
+    if (e == 203) {
+      res.sendStatus(203).send({err: "unauthorized Junction ID"});
     } else {
       res.sendStatus(500).end();
     }
@@ -168,8 +164,8 @@ router.post("/getActSig", authenticate, async (req, res) => {
   let pool;
   let pool2;
   try {
-    pool = await connection.connect();
-    pool2 = await connection2.connect();
+    pool = await poolPromise;
+    pool2 = await poolPromise2;
     let result = await pool
       .request()
       .query(
@@ -214,14 +210,10 @@ router.post("/getActSig", authenticate, async (req, res) => {
         error.push(e.name);
       }
     });
-    await pool.close();
-    await pool2.close();
     res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
     res.send({"running":running, "warning":warning, "error":error});
   } catch (e) {
     console.log(e);
-    await pool.close();
-    await pool2.close();
     res.sendStatus(500).end();
   }
 });

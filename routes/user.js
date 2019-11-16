@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 
-const { connection } = require('../db/sql_connect');
+const { poolPromise } = require('../db/sql_connect');
 const { generateAuthToken, decodeAuthToken } = require("../helpers/authToken");
 const { authenticate } = require("../middleware/authenticate");
 
@@ -28,10 +28,7 @@ router.post("/signUp", (req, res) => {
             }
             password = hash;
             try {
-                req.on('close', async (err) => {
-                    await pool.close();
-                });
-                pool = await connection.connect();
+                pool = await poolPromise;
                 let result = await pool.request().query(
                     "insert into users (email, password, name, phone) values('" +
                     req.body.email +
@@ -57,14 +54,12 @@ router.post("/signUp", (req, res) => {
                     "auth" +
                     "')"
                 );
-                await pool.close();
                 res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
                 res
                     .header("x-auth", token)
                     .send({ userID: userID, email: req.body.email });
             } catch (err) {
                 console.log(err);
-                await pool.close();
                 res.status(500).send(err);
             }
         });
@@ -82,10 +77,7 @@ router.post("/login", async (req, res) => {
   const email = req.body.email;
   let pool;
   try {
-    req.on("close", async err => {
-      await pool.close();
-    });
-    pool = await connection.connect();
+    pool = await poolPromise;
     let result = await pool.request().query(
       "select userID, password, name from users where email = '" +
         email +
@@ -114,28 +106,23 @@ router.post("/login", async (req, res) => {
                 "')"
             );
             const decoded = decodeAuthToken(token);
-            await pool.close();
             res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
             res.send({ userID: userID, name, exp: decoded.exp, token });
           } else {
             console.error("bcrypt compare:"+err);
-            await pool.close();
             res.status(401).end();
           }
         } catch (e) {
           console.log("bcrypt compare:"+e);
-          await pool.close();
           res.status(401).send(e);
         }
       }
     );
   } catch (err) {
     if(err === "no email found"){
-      await pool.close();
       res.status(401).send({err: "no email found"});
     }else{
       console.log(err);
-      await pool.close();
       res.status(500).end();
     }
   }
@@ -151,19 +138,14 @@ router.delete(
   async (req, res) => {
     let pool;
     try {
-      req.on("close", async err => {
-        await pool.close();
-      });
-      pool = await connection.connect();
+      pool = await poolPromise;
       const result = await pool.request().query(
         "exec removeToken @inToken = '" + req.token + "'"
       );
-      await pool.close();
       res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
       res.send(result);
     } catch (e) {
         console.log(e);
-      await pool.close();
       res.status(500).send(e);
     }
   }

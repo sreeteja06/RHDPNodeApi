@@ -8,8 +8,19 @@ const config = {
 
     options: {
         encrypt: true // Use this if you're on Windows Azure
+    },
+    pool:{
+        max: 30,
     }
 };
-const connection2 = new sql.ConnectionPool(config);
 
-module.exports = { connection2 };
+const poolPromise2 = new sql.ConnectionPool(config)
+  .connect()
+  .then(pool => {
+    console.log(`Connected to ${process.env.database2} database`)
+    return pool
+  })
+  .catch(err => console.log('Database Connection Failed! Bad Config: ', err))
+
+
+module.exports = { poolPromise2 }
