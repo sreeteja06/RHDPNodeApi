@@ -131,6 +131,7 @@ router.post("/login", async (req, res) => {
     );
   } catch (err) {
     if(err === "no email found"){
+      await pool.close();
       res.status(401).send({err: "no email found"});
     }else{
       console.log(err);

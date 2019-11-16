@@ -133,7 +133,7 @@ router.post(
   authenticate,
   async (req, res) => {
     let pool;
-    if (req.userID === 1) {
+    if (req.userID === 2) {
       try {
         pool = await connection.connect();
         req.on("close", async err => {
@@ -155,6 +155,8 @@ router.post(
         await pool.close();
         res.status(500).send(e);
       }
+    } else {
+      res.status(401).send({"err": "person unauthorized to perform this action"})
     }
   }
 );
