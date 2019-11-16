@@ -52,6 +52,10 @@ router.post("/newJunctionPoint",  authenticate, async (req, res) => {
         console.log(e);
         await pool.close();
         res.status(500).send(e);
+    }finally{
+      if(pool){
+        await pool.close();
+      }
     }
 });
 
@@ -71,7 +75,11 @@ router.get("/getUserJIDS", authenticate, async(req,res)=>{
     console.log(e);
     await pool.close();
     res.sendStatus(500).send(e);
-  }
+  }finally{
+		if(pool){
+			await pool.close();
+		}
+	}
 })
 
 router.get("/getLocations", authenticate, async (req, res) => {
@@ -125,7 +133,14 @@ router.get("/getLocations", authenticate, async (req, res) => {
     await pool.close();
     await pool2.close();
     res.status(500).send(e);
-  }
+  }finally{
+		if(pool){
+			await pool.close();
+    }
+    if(pool2){
+      await pool2.close();
+    }
+	}
 });
 
 router.post(
@@ -154,6 +169,10 @@ router.post(
         console.log(e);
         await pool.close();
         res.status(500).send(e);
+      }finally{
+        if(pool){
+          await pool.close();
+        }
       }
     } else {
       res.status(401).send({"err": "person unauthorized to perform this action"})
@@ -209,7 +228,14 @@ router.post("/timerpage", authenticate, async (req, res) => {
     else {
       res.sendStatus(500).end();
     }
-  }
+  }finally{
+		if(pool){
+			await pool.close();
+    }
+    if(pool2){
+      await pool2.close();
+    }
+	}
 });
 
 
