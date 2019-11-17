@@ -28,7 +28,7 @@ CREATE PROCEDURE acceptJAccessRequest
 AS
 BEGIN
   SET NOCOUNT ON;
-  UPDATE jAccessReqList SET reqStatus = 1 WHERE reqID = @inReqID;
+  DELETE FROM jAccessReqList WHERE reqID = @inReqID;
   INSERT into jAccess (JID, UserId) SELECT JID, userID FROM jAccessReqList where reqID = @inReqID;
 END
 GO

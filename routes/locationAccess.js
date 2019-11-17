@@ -58,7 +58,7 @@ router.get("/getAllJRequests", authenticate, awaitHandler(async (req, res) => {
         .query(`select jAccessReqList.reqID, users.userID, users.name, users.email,jAccessReqList.JID, 
       junctionPoint.junctionName, junctionPoint.city 
       from junctionPoint, users, jAccessReqList where junctionPoint.JID = jAccessReqList.JID 
-      and users.userID = jAccessReqList.UserID and jAccessReqList.reqStatus = 0`);
+      and users.userID = jAccessReqList.UserID`);
       res.send(requests.recordset);
     } catch (e) {
       console.log(e);
@@ -89,6 +89,23 @@ router.post("/acceptLocationRequest", authenticate, awaitHandler(async (req, res
       pool = await poolPromise;
       let response = await pool.request()
         .query(`exec acceptJAccessRequest @inReqID = ${req.body.reqID}`);
+      res.send(response);
+    } catch (e) {
+      console.log(e);
+      res.status(500).end(e);
+    }
+  }
+}))
+
+router.delete("/denyLocationRequest", authenticate, awaitHandler(async (req, res)=>{
+  let pool;
+  if (req.userID != 2) {
+    res.status(203).send({ err: "user unauthorized" });
+  } else {
+    try {
+      pool = await poolPromise;
+      let response = await pool.request()
+        .query(`DELETE FROM jAccessReqList WHERE reqID = ${req.body.reqID}`);
       res.send(response);
     } catch (e) {
       console.log(e);
