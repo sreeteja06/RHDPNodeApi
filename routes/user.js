@@ -111,8 +111,6 @@ router.post("/login", async (req, res) => {
               "select top (1) JID from jAccess where UserId = " +
                 userID
             );
-            console.log("JIDS:")
-            console.log(jid);
             let JID;
             if(jid.recordset.length == 0){
               JID = '';

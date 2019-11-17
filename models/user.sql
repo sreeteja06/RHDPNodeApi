@@ -13,6 +13,7 @@ create table users(
   password varchar(300) not null,
   name varchar(50) not null,
   phone bigint not null,
+  isAdmin bit not null DEFAULT 0 
 );
 GO
 

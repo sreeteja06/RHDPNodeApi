@@ -36,9 +36,11 @@ router.post("/newJunctionPoint",  authenticate, async (req, res) => {
             "exec addUserAccess @inUserId = " + req.userID + ", @InJID = " + JID
         );
         //change the @inUserId according to the userId of who is admin of the application, because eery juntion point added he can access it
-        result = await pool.request().query(
-            "exec addUserAccess @inUserId = 2, @InJID = " + JID
-        );
+        if(req.userID != 2){
+          result = await pool.request().query(
+              "exec addUserAccess @inUserId = 2, @InJID = " + JID
+          );
+        }
         result = await pool.request().query(
             "select * from junctionPoint where JID = " + JID
         );
@@ -66,6 +68,18 @@ router.get("/getUserJIDS", authenticate, async(req,res)=>{
     res.sendStatus(500).send(e);
   }
 })
+router.get("/getAllLocations", authenticate, async (req, res)=> {
+  let pool;
+  try{
+    pool = await poolPromise;
+    let response = await pool.request().query('select * from junctionPoint');
+    res.send(response.recordset);
+  }catch(e){
+    console.log(e);
+    res.status(500).send(e);
+  }
+})
+
 
 router.get("/getLocations", authenticate, async (req, res) => {
   let pool;

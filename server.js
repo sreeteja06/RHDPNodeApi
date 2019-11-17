@@ -9,6 +9,7 @@ const helmet = require('helmet')
 const userRoute = require('./routes/user');
 const locationRoute = require('./routes/locations');
 const statisticsRoute = require('./routes/statistics');
+const locationAccessRoute = require('./routes/locationAccess')
 
 let app = express();
 app.use(cors());
@@ -19,6 +20,7 @@ app.disable('x-powered-by')
 app.use(morgan(':method :url :status :response-time ms - :remote-addr'));
 app.use('/user', userRoute);
 app.use('/', locationRoute);
+app.use('/', locationAccessRoute);
 app.use('/statistics', statisticsRoute);
 const port = process.env.PORT || 1337;
 
