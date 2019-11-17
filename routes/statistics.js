@@ -25,7 +25,18 @@ const getTimeInMinutes = timeF => {
   }
 }
 
-router.post("/getDensity",  authenticate, async (req, res) => {
+const awaitHandler = fn => {
+  return async (req, res, next) => {
+      try {
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          await fn(req, res, next);
+      } catch (err) {
+          next(err);
+      }
+  };
+};
+
+router.post("/getDensity",  authenticate, awaitHandler(async (req, res) => {
   let pool;
   try {
     console.log("Get density endpoint");
@@ -87,9 +98,9 @@ router.post("/getDensity",  authenticate, async (req, res) => {
     console.log(e);
     res.sendStatus(500).end();
   }
-});
+}));
 
-router.post("/getAvgTime", authenticate, async (req, res) => {
+router.post("/getAvgTime", authenticate, awaitHandler(async (req, res) => {
   let pool;
   try {
     pool = await poolPromise;
@@ -158,9 +169,9 @@ router.post("/getAvgTime", authenticate, async (req, res) => {
       res.sendStatus(500).end();
     }
   }
-});
+}));
 
-router.post("/getActSig", authenticate, async (req, res) => {
+router.post("/getActSig", authenticate, awaitHandler(async (req, res) => {
   let pool;
   let pool2;
   try {
@@ -216,6 +227,6 @@ router.post("/getActSig", authenticate, async (req, res) => {
     console.log(e);
     res.sendStatus(500).end();
   }
-});
+}));
 
 module.exports = router;

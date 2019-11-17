@@ -14,7 +14,18 @@ const router = express.Router();
 const { poolPromise } = require("../db/sql_connect");
 const { authenticate } = require("../middleware/authenticate");
 
-router.get("/jAccessList", authenticate, async (req, res) => {
+const awaitHandler = fn => {
+  return async (req, res, next) => {
+      try {
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          await fn(req, res, next);
+      } catch (err) {
+          next(err);
+      }
+  };
+};
+
+router.get("/jAccessList", authenticate, awaitHandler(async (req, res) => {
   let pool;
   try {
     if (req.userID == 2) {
@@ -34,9 +45,9 @@ router.get("/jAccessList", authenticate, async (req, res) => {
     console.log(e);
     res.status(500).end(e);
   }
-});
+}));
 
-router.get("/getAllJRequests", authenticate, async (req, res) => {
+router.get("/getAllJRequests", authenticate, awaitHandler(async (req, res) => {
   let pool;
   if (req.userID != 2) {
     res.status(203).send({ err: "user unauthorized" });
@@ -54,9 +65,9 @@ router.get("/getAllJRequests", authenticate, async (req, res) => {
       res.status(500).end(e);
     }
   }
-});
+}));
 
-router.post("/requestLocationAccess", authenticate, async (req, res) => {
+router.post("/requestLocationAccess", authenticate, awaitHandler(async (req, res) => {
   let pool;
   try {
     pool = await poolPromise;
@@ -67,9 +78,9 @@ router.post("/requestLocationAccess", authenticate, async (req, res) => {
     console.log(e);
     res.status(500).end(e);
   }
-});
+}));
 
-router.post("/acceptLocationRequest", authenticate, async (req, res)=>{
+router.post("/acceptLocationRequest", authenticate, awaitHandler(async (req, res)=>{
   let pool;
   if (req.userID != 2) {
     res.status(203).send({ err: "user unauthorized" });
@@ -78,14 +89,30 @@ router.post("/acceptLocationRequest", authenticate, async (req, res)=>{
       pool = await poolPromise;
       let response = await pool.request()
         .query(`exec acceptJAccessRequest @inReqID = ${req.body.reqID}`);
-      res.status(200);
+      res.send(response);
     } catch (e) {
       console.log(e);
       res.status(500).end(e);
     }
   }
-})
+}))
 
-router.post("/login", async (req, res) => {});
+router.delete("/removeLocationAccess", authenticate, awaitHandler(async (req, res)=>{
+  let pool;
+  if (req.userID != 2) {
+    res.status(203).send({ err: "user unauthorized" });
+  } else {
+    try {
+      pool = await poolPromise;
+      let response = await pool.request()
+        .query(`DELETE from jAccess where JID = ${req.body.JID} and UserId = ${req.userID}`);
+      res.send(response);
+    } catch (e) {
+      console.log(e);
+      res.status(500).end(e);
+    }
+  }
+}))
+
 
 module.exports = router;

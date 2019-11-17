@@ -6,7 +6,19 @@ const { poolPromise2 } = require("../db/sql_connect2");
 const { authenticate } = require("../middleware/authenticate");
 const { center_geolocation } = require("../helpers/center_geolocation");
 const {timer } = require('../helpers/timerpage');
-router.post("/newJunctionPoint",  authenticate, async (req, res) => {
+
+const awaitHandler = fn => {
+  return async (req, res, next) => {
+      try {
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          await fn(req, res, next);
+      } catch (err) {
+          next(err);
+      }
+  };
+};
+
+router.post("/newJunctionPoint",  authenticate, awaitHandler(async (req, res) => {
   let pool;
     try {
         pool = await poolPromise;
@@ -50,9 +62,9 @@ router.post("/newJunctionPoint",  authenticate, async (req, res) => {
         console.log(e);
         res.status(500).send(e);
     }
-});
+}));
 
-router.get("/getUserJIDS", authenticate, async(req,res)=>{
+router.get("/getUserJIDS", authenticate, awaitHandler(async(req,res)=>{
   let pool;
   try {
     pool = await poolPromise;
@@ -67,8 +79,8 @@ router.get("/getUserJIDS", authenticate, async(req,res)=>{
     console.log(e);
     res.sendStatus(500).send(e);
   }
-})
-router.get("/getAllLocations", authenticate, async (req, res)=> {
+}))
+router.get("/getAllLocations", authenticate, awaitHandler(async (req, res)=> {
   let pool;
   try{
     pool = await poolPromise;
@@ -78,10 +90,10 @@ router.get("/getAllLocations", authenticate, async (req, res)=> {
     console.log(e);
     res.status(500).send(e);
   }
-})
+}))
 
 
-router.get("/getLocations", authenticate, async (req, res) => {
+router.get("/getLocations", authenticate, awaitHandler(async (req, res) => {
   let pool;
   let pool2
   try {
@@ -126,12 +138,12 @@ router.get("/getLocations", authenticate, async (req, res) => {
     console.log(e);
     res.status(500).send(e);
   }
-});
+}));
 
 router.post(
   "/giveLocationAccess",
   authenticate,
-  async (req, res) => {
+  awaitHandler(async (req, res) => {
     let pool;
     if (req.userID === 2) {
       try {
@@ -153,10 +165,10 @@ router.post(
     } else {
       res.status(203).send({"err": "person unauthorized to perform this action"})
     }
-  }
+  })
 );
 
-router.post("/timerpage", authenticate, async (req, res) => {
+router.post("/timerpage", authenticate, awaitHandler(async (req, res) => {
   let pool;
   let pool2;
   try {
@@ -201,7 +213,7 @@ router.post("/timerpage", authenticate, async (req, res) => {
       res.sendStatus(500).end();
     }
   }
-});
+}));
 
 
 module.exports = router;

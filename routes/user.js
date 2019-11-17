@@ -6,6 +6,17 @@ const { poolPromise } = require('../db/sql_connect');
 const { generateAuthToken, decodeAuthToken } = require("../helpers/authToken");
 const { authenticate } = require("../middleware/authenticate");
 
+const awaitHandler = fn => {
+  return async (req, res, next) => {
+      try {
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          await fn(req, res, next);
+      } catch (err) {
+          next(err);
+      }
+  };
+};
+
 /***
  * @description this api endpoint is used for signup of an new user, and logs him by creating the token
  * @param {string} email - req.body.email #requires to be unique
@@ -72,7 +83,7 @@ router.post("/signUp", (req, res) => {
  * @param {string} password - req.body.password 
  * @returns {Object} userID, name, branch, exp, token #after successfully creating the auth token which expires in 12hr it returns the userid and email
  */
-router.post("/login", async (req, res) => {
+router.post("/login", awaitHandler(async (req, res) => {
   const password = req.body.password;
   const email = req.body.email;
   let pool;
@@ -137,7 +148,7 @@ router.post("/login", async (req, res) => {
       res.status(500).end();
     }
   }
-});
+}));
 
 /***
  * @description this api endpoint is used for logout
@@ -146,7 +157,7 @@ router.post("/login", async (req, res) => {
 router.delete(
   "/me/logout",
   authenticate,
-  async (req, res) => {
+  awaitHandler(async (req, res) => {
     let pool;
     try {
       pool = await poolPromise;
@@ -159,7 +170,7 @@ router.delete(
         console.log(e);
       res.status(500).send(e);
     }
-  }
+  })
 );
 
 router.get("/me",  authenticate, async (req, res) => {
