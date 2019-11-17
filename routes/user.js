@@ -107,7 +107,20 @@ router.post("/login", async (req, res) => {
             );
             const decoded = decodeAuthToken(token);
             res.setHeader( 'Content-Type', 'application/json; charset=utf-8' );
-            res.send({ userID: userID, name, exp: decoded.exp, token });
+            let jid = await pool.request().query(
+              "select top (1) JID from jAccess where UserId = " +
+                userID
+            );
+            console.log("JIDS:")
+            console.log(jid);
+            let JID;
+            if(jid.recordset.length == 0){
+              JID = '';
+            }
+            else{
+              JID = jid.recordset[0].JID
+            }
+            res.send({ userID: userID, name, exp: decoded.exp, token, JID: JID });
           } else {
             console.error("bcrypt compare:"+err);
             res.status(401).end();
