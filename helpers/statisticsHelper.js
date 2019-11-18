@@ -31,41 +31,22 @@ grpBy = Group By
 */
 const getGrpByFirstValue = (Upload_Time, grpBy) => {
   if (grpBy === 1) {
-    return new Date(Upload_Time.toISOString().replace("Z", "")).getHours();
+    return new Date(Upload_Time.toISOString().replace('Z', '')).getHours();
   } else if (grpBy === 2) {
     //0 - morning, 1 - afternoon, 2 - evening, 3 - night
-    let x = new Date(Upload_Time.toISOString().replace("Z", "")).getHours();
-    if (
-      x === 6 ||
-      x === 7 ||
-      x === 8 ||
-      x === 9 ||
-      x === 10 ||
-      x === 11
-    ) {
+    let x = new Date(Upload_Time.toISOString().replace('Z', '')).getHours();
+    if (x === 6 || x === 7 || x === 8 || x === 9 || x === 10 || x === 11) {
       return 0;
-    } else if (
-      x === 12 ||
-      x === 13 ||
-      x === 14 ||
-      x === 15 ||
-      x === 16
-    ) {
+    } else if (x === 12 || x === 13 || x === 14 || x === 15 || x === 16) {
       return 1;
-    } else if (
-      x === 17 ||
-      x === 18 ||
-      x === 19 ||
-      x === 20 ||
-      x === 21
-    ) {
+    } else if (x === 17 || x === 18 || x === 19 || x === 20 || x === 21) {
       return 2;
-    }else {
+    } else {
       return 3;
     }
   } else if (grpBy === 3) {
     //0 - peak, 1 - off -peak
-    let x = new Date(Upload_Time.toISOString().replace("Z", "")).getHours();
+    let x = new Date(Upload_Time.toISOString().replace('Z', '')).getHours();
     if (
       x === 8 ||
       x === 9 ||
@@ -82,12 +63,12 @@ const getGrpByFirstValue = (Upload_Time, grpBy) => {
     }
   } else if (grpBy === 4) {
     // 0 - sunday, 1 - monday ......
-    return new Date(Upload_Time.toISOString().replace("Z", "")).getDay();
+    return new Date(Upload_Time.toISOString().replace('Z', '')).getDay();
   } else if (grpBy === 5) {
     //0 - jan, 1 - feb .......
-    return new Date(Upload_Time.toISOString().replace("Z", "")).getMonth();
-  } else if(grpBy === 6) {
-    return (new Date(Upload_Time.toISOString().replace("Z", "")).getDate())-1;
+    return new Date(Upload_Time.toISOString().replace('Z', '')).getMonth();
+  } else if (grpBy === 6) {
+    return new Date(Upload_Time.toISOString().replace('Z', '')).getDate() - 1;
   }
 };
 const findAvgTime = (resArr, grpBy) => {
@@ -147,7 +128,6 @@ const findDensity = packets => {
   density = density / dPackets.length;
   return Math.round(density / 2.55);
 };
-
 
 module.exports = {
   findDensity,

@@ -1,9 +1,9 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
 const generateAuthToken = (userID, access) => {
   const token = jwt
     .sign({ userID: userID, access }, process.env.JWT_SECRET, {
-      expiresIn: "12h"
+      expiresIn: '12h'
     })
     .toString();
   return token;
@@ -14,11 +14,11 @@ const decodeAuthToken = token => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     return decoded;
   } catch (e) {
-    return new Error("token validation failed")
+    return new Error('token validation failed');
   }
 };
 
 module.exports = {
-    generateAuthToken,
-    decodeAuthToken
-}
+  generateAuthToken,
+  decodeAuthToken
+};

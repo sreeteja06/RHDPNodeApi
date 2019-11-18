@@ -1,23 +1,23 @@
-require("./config/config");
+require('./config/config');
 
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const morgan = require('morgan');
-const helmet = require('helmet')
+const helmet = require('helmet');
 
 const userRoute = require('./routes/user');
 const locationRoute = require('./routes/locations');
 const statisticsRoute = require('./routes/statistics');
-const locationAccessRoute = require('./routes/locationAccess')
-const tempUserRoute = require('./routes/tempUser')
+const locationAccessRoute = require('./routes/locationAccess');
+const tempUserRoute = require('./routes/tempUser');
 
 let app = express();
 app.use(cors());
 app.use(bodyParser.json());
 // app.use(helmet.xssFilter());
-app.use(helmet()) //enable in production
-app.disable('x-powered-by')
+app.use(helmet()); //enable in production
+app.disable('x-powered-by');
 app.use(morgan(':method :url :status :response-time ms - :remote-addr'));
 app.use('/user', userRoute);
 app.use('/', locationRoute);
@@ -26,7 +26,7 @@ app.use('/', tempUserRoute);
 app.use('/statistics', statisticsRoute);
 const port = process.env.PORT || 1337;
 
-app.get("/", (req, res) => {
+app.get('/', (req, res) => {
   res.send(`available routes haha<br/>
 	/newJunctionPoint - auth required<br/>
 	/getLocations - auth required<br/>

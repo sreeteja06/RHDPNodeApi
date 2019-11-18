@@ -8,16 +8,16 @@
  * Author: SreeTeja06 (sreeteja.muthyala@gmail.com)
 
  */
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 
-const { poolPromise } = require("../db/sql_connect");
-const { authenticate } = require("../middleware/authenticate");
+const { poolPromise } = require('../db/sql_connect');
+const { authenticate } = require('../middleware/authenticate');
 
 const awaitHandler = fn => {
   return async (req, res, next) => {
     try {
-      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
       await fn(req, res, next);
     } catch (err) {
       next(err);
@@ -26,7 +26,7 @@ const awaitHandler = fn => {
 };
 
 router.get(
-  "/jAccessList",
+  '/jAccessList',
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
@@ -42,7 +42,7 @@ router.get(
         console.log(jAccess.recordset);
         res.send(jAccess.recordset);
       } else {
-        res.status(203).send({ err: "not an admin" });
+        res.status(203).send({ err: 'not an admin' });
       }
     } catch (e) {
       console.log(e);
@@ -52,12 +52,12 @@ router.get(
 );
 
 router.get(
-  "/getLocationStatusForUsersADMIN",
+  '/getLocationStatusForUsersADMIN',
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
     if (req.userID != 2) {
-      res.status(203).send({ err: "user unauthorized" });
+      res.status(203).send({ err: 'user unauthorized' });
     } else {
       try {
         pool = await poolPromise;
@@ -79,7 +79,7 @@ router.get(
 );
 
 router.get(
-  "/getLocationStatusForUser",
+  '/getLocationStatusForUser',
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
@@ -102,12 +102,12 @@ router.get(
 );
 
 router.get(
-  "/getAllJRequests",
+  '/getAllJRequests',
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
     if (req.userID != 2) {
-      res.status(203).send({ err: "user unauthorized" });
+      res.status(203).send({ err: 'user unauthorized' });
     } else {
       try {
         pool = await poolPromise;
@@ -126,7 +126,7 @@ router.get(
 );
 
 router.post(
-  "/requestLocationAccess",
+  '/requestLocationAccess',
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
@@ -146,12 +146,12 @@ router.post(
 );
 
 router.post(
-  "/acceptLocationRequest",
+  '/acceptLocationRequest',
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
     if (req.userID != 2) {
-      res.status(203).send({ err: "user unauthorized" });
+      res.status(203).send({ err: 'user unauthorized' });
     } else {
       try {
         pool = await poolPromise;
@@ -168,12 +168,12 @@ router.post(
 );
 
 router.delete(
-  "/denyLocationRequest",
+  '/denyLocationRequest',
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
     if (req.userID != 2) {
-      res.status(203).send({ err: "user unauthorized" });
+      res.status(203).send({ err: 'user unauthorized' });
     } else {
       try {
         pool = await poolPromise;
@@ -190,12 +190,12 @@ router.delete(
 );
 
 router.delete(
-  "/removeLocationAccess",
+  '/removeLocationAccess',
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
     if (req.userID != 2) {
-      res.status(203).send({ err: "user unauthorized" });
+      res.status(203).send({ err: 'user unauthorized' });
     } else {
       try {
         pool = await poolPromise;
