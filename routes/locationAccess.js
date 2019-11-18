@@ -52,6 +52,33 @@ router.get(
 );
 
 router.get(
+  "/getLocationStatusForUsersADMIN",
+  authenticate,
+  awaitHandler(async (req, res) => {
+    let pool;
+    if (req.userID != 2) {
+      res.status(203).send({ err: "user unauthorized" });
+    } else {
+      try {
+        pool = await poolPromise;
+        let requests = await pool.request().query(`SELECT CASE
+        WHEN JP.JID = JA.JID
+           THEN 1
+           ELSE 0
+        END AS access, JP.junctionName, JP.city, JP.JID
+        FROM jAccess as JA 
+        RIGHT JOIN junctionPoint as JP 
+        ON JA.JID = JP.JID and JA.UserId = ${req.body.userID}`);
+        res.send(requests.recordset);
+      } catch (e) {
+        console.log(e);
+        res.status(500).end(e);
+      }
+    }
+  })
+);
+
+router.get(
   "/getLocationStatusForUser",
   authenticate,
   awaitHandler(async (req, res) => {
