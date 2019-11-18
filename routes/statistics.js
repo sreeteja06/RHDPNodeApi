@@ -1,4 +1,5 @@
 const express = require('express');
+
 const router = express.Router();
 
 const { findDensity, findAvgTime } = require('../helpers/statisticsHelper');
@@ -7,7 +8,7 @@ const { poolPromise } = require('../db/sql_connect');
 const { poolPromise2 } = require('../db/sql_connect2');
 
 const getTimeInMinutes = timeF => {
-  //past 15 mins
+  // past 15 mins
   if (timeF == 1) {
     return 15;
   } else if (timeF == 2) {
@@ -23,6 +24,7 @@ const getTimeInMinutes = timeF => {
     //this month
     return "concat(format(@NOWDATE, 'yyyy-MM'), '-01 00:00:00.000')";
   }
+  return '';
 };
 
 const awaitHandler = fn => {

@@ -9,6 +9,7 @@
 
  */
 const express = require('express');
+
 const router = express.Router();
 
 const { poolPromise } = require('../db/sql_connect');
@@ -33,7 +34,7 @@ router.get(
     try {
       if (req.userID == 2) {
         pool = await poolPromise;
-        let jAccess = await pool.request().query(
+        const jAccess = await pool.request().query(
           `select users.userID, users.name, users.email,jAccess.JID, 
         junctionPoint.junctionName, junctionPoint.city 
         from junctionPoint, users, jAccess where junctionPoint.JID = jAccess.JID 
@@ -61,7 +62,7 @@ router.get(
     } else {
       try {
         pool = await poolPromise;
-        let requests = await pool.request().query(`SELECT CASE
+        const requests = await pool.request().query(`SELECT CASE
         WHEN JP.JID = JA.JID
            THEN 1
            ELSE 0
@@ -85,7 +86,7 @@ router.get(
     let pool;
     try {
       pool = await poolPromise;
-      let requests = await pool.request().query(`SELECT CASE
+      const requests = await pool.request().query(`SELECT CASE
       WHEN JP.JID = JA.JID
          THEN 1
          ELSE 0
@@ -111,7 +112,7 @@ router.get(
     } else {
       try {
         pool = await poolPromise;
-        let requests = await pool.request()
+        const requests = await pool.request()
           .query(`select jAccessReqList.reqID, users.userID, users.name, users.email,jAccessReqList.JID, 
       junctionPoint.junctionName, junctionPoint.city 
       from junctionPoint, users, jAccessReqList where junctionPoint.JID = jAccessReqList.JID 
@@ -132,7 +133,7 @@ router.post(
     let pool;
     try {
       pool = await poolPromise;
-      let requests = await pool
+      const requests = await pool
         .request()
         .query(
           `insert into jAccessReqList (JID, userID) values (${req.body.JID}, ${req.userID})`
@@ -155,7 +156,7 @@ router.post(
     } else {
       try {
         pool = await poolPromise;
-        let response = await pool
+        const response = await pool
           .request()
           .query(`exec acceptJAccessRequest @inReqID = ${req.body.reqID}`);
         res.send(response);
@@ -177,7 +178,7 @@ router.delete(
     } else {
       try {
         pool = await poolPromise;
-        let response = await pool
+        const response = await pool
           .request()
           .query(`DELETE FROM jAccessReqList WHERE reqID = ${req.body.reqID}`);
         res.send(response);
@@ -199,7 +200,7 @@ router.delete(
     } else {
       try {
         pool = await poolPromise;
-        let response = await pool
+        const response = await pool
           .request()
           .query(
             `DELETE from jAccess where JID = ${req.body.JID} and UserId = ${req.userID}`

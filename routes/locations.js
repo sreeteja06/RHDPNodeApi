@@ -1,10 +1,11 @@
 const express = require('express');
+
 const router = express.Router();
 
 const { poolPromise } = require('../db/sql_connect');
 const { poolPromise2 } = require('../db/sql_connect2');
 const { authenticate } = require('../middleware/authenticate');
-const { center_geolocation } = require('../helpers/center_geolocation');
+const { centerGeolocation } = require('../helpers/center_geolocation');
 const { timer } = require('../helpers/timerpage');
 
 const awaitHandler = fn => {
@@ -28,43 +29,26 @@ router.post(
       let result = await pool
         .request()
         .query(
-          "insert into junctionPoint (JID, longitude, latitude, area, city, junctionName) values('" +
-            req.body.JID +
-            "','" +
-            req.body.longitude +
-            "','" +
-            req.body.latitude +
-            "','" +
-            req.body.area +
-            "','" +
-            req.body.city +
-            "','" +
-            req.body.junctionName +
-            "')"
+          `insert into junctionPoint (JID, longitude, latitude, area, city, junctionName) values('${req.body.JID}','${req.body.longitude}','${req.body.latitude}','${req.body.area}','${req.body.city}','${req.body.junctionName}')`
         );
       result = await pool
         .request()
         .query(
-          'select JID from junctionPoint where longitude = ' +
-            req.body.longitude +
-            'and latitude =' +
-            req.body.latitude
+          `select JID from junctionPoint where longitude = ${req.body.longitude}and latitude =${req.body.latitude}`
         );
-      const JID = result.recordset[0].JID;
+      const { JID } = result.recordset[0];
       result = await pool
         .request()
-        .query(
-          'exec addUserAccess @inUserId = ' + req.userID + ', @InJID = ' + JID
-        );
-      //change the @inUserId according to the userId of who is admin of the application, because eery juntion point added he can access it
+        .query(`exec addUserAccess @inUserId = ${req.userID}, @InJID = ${JID}`);
+      // change the @inUserId according to the userId of who is admin of the application, because eery juntion point added he can access it
       if (req.userID != 2) {
         result = await pool
           .request()
-          .query('exec addUserAccess @inUserId = 2, @InJID = ' + JID);
+          .query(`exec addUserAccess @inUserId = 2, @InJID = ${JID}`);
       }
       result = await pool
         .request()
-        .query('select * from junctionPoint where JID = ' + JID);
+        .query(`select * from junctionPoint where JID = ${JID}`);
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.send(result.recordset[0]);
     } catch (e) {
@@ -84,8 +68,7 @@ router.get(
       let jids = await pool
         .request()
         .query(
-          'select junctionPoint.JID, junctionName  from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = ' +
-            req.userID
+          `select junctionPoint.JID, junctionName  from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = ${req.userID}`
         );
       jids = jids.recordset.map(x => {
         return { JID: x.JID, name: x.junctionName };
@@ -105,7 +88,9 @@ router.get(
     let pool;
     try {
       pool = await poolPromise;
-      let response = await pool.request().query('select * from junctionPoint');
+      const response = await pool
+        .request()
+        .query('select * from junctionPoint');
       res.send(response.recordset);
     } catch (e) {
       console.log(e);
@@ -123,15 +108,15 @@ router.get(
     try {
       pool = await poolPromise;
       pool2 = await poolPromise2;
-      let result = await pool
+      const result = await pool
         .request()
-        .query('exec getLocationsForUser @inUserId = ' + req.userID);
-      const centerPoints = center_geolocation(result.recordset);
-      let jids = [];
+        .query(`exec getLocationsForUser @inUserId = ${req.userID}`);
+      const centerPoints = centerGeolocation(result.recordset);
+      const jids = [];
       result.recordset.forEach(e => {
         jids.push(e.JID[0]);
       });
-      let activeSatusResult = await pool2.request().query(`
+      const activeSatusResult = await pool2.request().query(`
     WITH cte 
      AS (SELECT UID, 
                 Error_Code,
@@ -146,14 +131,15 @@ router.get(
     ORDER BY UID
     `);
       result.recordset.forEach(e => {
+        // eslint-disable-next-line prefer-destructuring
         e.JID = e.JID[0];
-        temp = activeSatusResult.recordset.find(h => {
+        const temp = activeSatusResult.recordset.find(h => {
           return h.UID === e.JID;
         });
         if (temp != undefined) {
-          e['activeStatus'] = temp.ERROR_CODE;
+          e.activeStatus = temp.ERROR_CODE;
         } else {
-          e['activeStatus'] = 2;
+          e.activeStatus = 2;
         }
       });
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -173,13 +159,10 @@ router.post(
     if (req.userID === 2) {
       try {
         pool = await poolPromise;
-        let result = await pool
+        const result = await pool
           .request()
           .query(
-            'exec addUserAccess @inUserId = ' +
-              req.body.addUserid +
-              ', @InJID = ' +
-              req.body.JID
+            `exec addUserAccess @inUserId = ${req.body.addUserid}, @InJID = ${req.body.JID}`
           );
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.send(result);
@@ -207,8 +190,7 @@ router.post(
       let jidds = await pool
         .request()
         .query(
-          'select junctionPoint.JID from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = ' +
-            req.userID
+          `select junctionPoint.JID from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = ${req.userID}`
         );
       jidds = jidds.recordset.map(x => x.JID);
       const jids = req.body.interID;
@@ -217,19 +199,21 @@ router.post(
           return e == jids;
         }) === undefined
       ) {
+        // eslint-disable-next-line no-throw-literal
         throw '203';
       }
-      let result = await pool2
+      const result = await pool2
         .request()
         .query(
           `Select TOP 3 Upload_Time, Message from TrafficInfoPage where UID = ${jids.toString()} order by Upload_Time DESC`
         );
-      let packets = result.recordset.map(x => x.Message);
-      let date_time = result.recordset.map(x => x.Upload_Time);
+      const packets = result.recordset.map(x => x.Message);
+      const dateTime = result.recordset.map(x => x.Upload_Time);
       if (packets.length < 3) {
+        // eslint-disable-next-line no-throw-literal
         throw 'less than 3 packets';
       }
-      let x = timer(packets, date_time);
+      const x = timer(packets, dateTime);
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.send(x);
     } catch (e) {

@@ -1,4 +1,5 @@
 const express = require('express');
+
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 
@@ -17,7 +18,7 @@ const awaitHandler = fn => {
   };
 };
 
-/***
+/** *
  * @description this api endpoint is used for signup of an new user, and logs him by creating the token
  * @param {string} email - req.body.email #requires to be unique
  * @param {string} password - req.body.password #the password is hashed and saved into table
@@ -26,12 +27,14 @@ const awaitHandler = fn => {
  * @returns {Object} userId and Email #after successfully creating the auth token which expires in 12hr it returns the userid and email
  */
 router.post('/signUp', (req, res) => {
-  let password, pool;
+  let password;
+  let pool;
   bcrypt.genSalt(10, (err, salt) => {
     if (err) {
       console.log(err);
       res.send(500).send(err);
     }
+    // eslint-disable-next-line no-shadow
     bcrypt.hash(req.body.password, salt, async (err, hash) => {
       if (err) {
         console.log(err);
@@ -43,38 +46,23 @@ router.post('/signUp', (req, res) => {
         let result = await pool
           .request()
           .query(
-            "insert into users (email, password, name, phone) values('" +
-              req.body.email +
-              "','" +
-              password +
-              "', '" +
-              req.body.name +
-              "'," +
-              req.body.phone +
-              ')'
+            `insert into users (email, password, name, phone) values('${req.body.email}','${password}', '${req.body.name}',${req.body.phone})`
           );
         result = await pool
           .request()
-          .query(
-            "select userID from users where email = '" + req.body.email + "'"
-          );
-        const userID = result.recordset[0].userID;
+          .query(`select userID from users where email = '${req.body.email}'`);
+        const { userID } = result.recordset[0];
         const token = generateAuthToken(userID, 'auth');
         result = await pool
           .request()
           .query(
-            'insert into tokens (userID, token, access) values(' +
-              userID +
-              ",'" +
-              token +
-              "','" +
-              'auth' +
-              "')"
+            `insert into tokens (userID, token, access) values(${userID},'${token}','` +
+              `auth` +
+              `')`
           );
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
-        res
-          .header('x-auth', token)
-          .send({ userID: userID, email: req.body.email });
+        res.header('x-auth', token).send({ userID, email: req.body.email });
+        // eslint-disable-next-line no-shadow
       } catch (err) {
         console.log(err);
         res.status(500).send(err);
@@ -83,7 +71,7 @@ router.post('/signUp', (req, res) => {
   });
 });
 
-/***
+/** *
  * @description this api endpoint is used for login
  * @param {string} email - req.body.email
  * @param {string} password - req.body.password
@@ -92,26 +80,25 @@ router.post('/signUp', (req, res) => {
 router.post(
   '/login',
   awaitHandler(async (req, res) => {
-    const password = req.body.password;
-    const email = req.body.email;
+    const { password } = req.body;
+    const { email } = req.body;
     let pool;
     try {
       pool = await poolPromise;
       let result = await pool
         .request()
         .query(
-          "select userID, password, name from users where email = '" +
-            email +
-            "'"
+          `select userID, password, name from users where email = '${email}'`
         );
       if (result.recordset[0] === undefined) {
+        // eslint-disable-next-line no-throw-literal
         throw 'no email found';
       }
-      const userID = result.recordset[0].userID;
-      const name = result.recordset[0].name;
+      const { userID } = result.recordset[0];
+      const { name } = result.recordset[0];
       await pool
         .request()
-        .query("delete from tokens where userID = '" + userID + "'");
+        .query(`delete from tokens where userID = '${userID}'`);
       bcrypt.compare(
         password,
         result.recordset[0].password,
@@ -122,20 +109,16 @@ router.post(
               result = await pool
                 .request()
                 .query(
-                  'insert into tokens (userID, token, access) values(' +
-                    userID +
-                    ",'" +
-                    token +
-                    "','" +
-                    'auth' +
-                    "')"
+                  `insert into tokens (userID, token, access) values(${userID},'${token}','` +
+                    `auth` +
+                    `')`
                 );
               const decoded = decodeAuthToken(token);
               res.setHeader('Content-Type', 'application/json; charset=utf-8');
-              let jid = await pool
+              const jid = await pool
                 .request()
                 .query(
-                  'select top (1) JID from jAccess where UserId = ' + userID
+                  `select top (1) JID from jAccess where UserId = ${userID}`
                 );
               let JID;
               if (jid.recordset.length == 0) {
@@ -144,18 +127,18 @@ router.post(
                 JID = jid.recordset[0].JID;
               }
               res.send({
-                userID: userID,
+                userID,
                 name,
                 exp: decoded.exp,
                 token,
-                JID: JID
+                JID
               });
             } else {
-              console.error('bcrypt compare:' + err);
+              console.error(`bcrypt compare:${err}`);
               res.status(401).end();
             }
           } catch (e) {
-            console.log('bcrypt compare:' + e);
+            console.log(`bcrypt compare:${e}`);
             res.status(401).send(e);
           }
         }
@@ -171,7 +154,7 @@ router.post(
   })
 );
 
-/***
+/** *
  * @description this api endpoint is used for logout
  * @param {string} token - x-auth header
  */
@@ -184,7 +167,7 @@ router.delete(
       pool = await poolPromise;
       const result = await pool
         .request()
-        .query("exec removeToken @inToken = '" + req.token + "'");
+        .query(`exec removeToken @inToken = '${req.token}'`);
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.send(result);
     } catch (e) {

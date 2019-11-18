@@ -10,8 +10,8 @@
  */
 const nodemailer = require('nodemailer');
 
-const sendMail = (subject, mailBody) => {
-  var transporter = nodemailer.createTransport({
+const sendMail = (subject, mailBody, mailID) => {
+  const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
     secure: true, // use SSL,
@@ -22,18 +22,18 @@ const sendMail = (subject, mailBody) => {
     }
   });
 
-  var mailOptions = {
+  const mailOptions = {
     from: 'dummycar.dealer@gmail.com',
-    to: body.email,
-    subject: subject,
+    to: mailID,
+    subject,
     text: mailBody
   };
 
-  transporter.sendMail(mailOptions, function(error, info) {
+  transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.log(error);
     } else {
-      console.log('Email sent: ' + info.response);
+      console.log(`Email sent: ${info.response}`);
     }
   });
 };
