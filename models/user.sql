@@ -17,6 +17,25 @@ create table users(
 );
 GO
 
+CREATE TABLE tempUser(
+  tempUserID int not null primary key identity(1,1),
+  email varchar(60) not null UNIQUE,
+  password varchar(300) not null,
+  name varchar(50) not null,
+  phone bigint not null,
+);
+GO
+
+CREATE PROCEDURE acceptUserRequest
+  @inTempUserID int
+AS
+BEGIN
+  SET NOCOUNT ON;
+  INSERT into users (email, password, name, phone) SELECT email, password, name, phone FROM tempUser where tempUserID = @inTempUserID;
+  DELETE FROM tempUser WHERE tempUserID = @inTempUserID;
+END
+GO
+
 create table tokens(
   userID int not null,
   token varchar(300) not null,

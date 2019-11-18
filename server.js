@@ -10,6 +10,7 @@ const userRoute = require('./routes/user');
 const locationRoute = require('./routes/locations');
 const statisticsRoute = require('./routes/statistics');
 const locationAccessRoute = require('./routes/locationAccess')
+const tempUserRoute = require('./routes/tempUser')
 
 let app = express();
 app.use(cors());
@@ -21,6 +22,7 @@ app.use(morgan(':method :url :status :response-time ms - :remote-addr'));
 app.use('/user', userRoute);
 app.use('/', locationRoute);
 app.use('/', locationAccessRoute);
+app.use('/', tempUserRoute);
 app.use('/statistics', statisticsRoute);
 const port = process.env.PORT || 1337;
 
