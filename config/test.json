@@ -1,7 +1,8 @@
 {
-	"user": "sa",
-	"password": "Docker123",
-  "server": "localhost", 
+  "user": "sa",
+  "password": "Docker123",
+  "server": "localhost",
   "database": "rhdpTest",
-  "jwt_secret": "vbauglbvesv32alwb2ssg1"
+  "jwt_secret": "vbauglbvesv32alwb2ssg1",
+  "EMAILPASS": "rhpd@gmail"
 }

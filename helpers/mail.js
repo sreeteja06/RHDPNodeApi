@@ -17,13 +17,13 @@ const sendMail = (subject, mailBody, mailID) => {
     secure: true, // use SSL,
     // you can try with TLS, but port is then 587
     auth: {
-      user: 'dummycar.dealer@gmail.com', // Your email id
-      pass: process.env.EPASS // Your password
+      user: 'rhpdsoftsol@gmail.com', // Your email id
+      pass: process.env.EMAILPASS // Your password
     }
   });
 
   const mailOptions = {
-    from: 'dummycar.dealer@gmail.com',
+    from: 'rhpdsoftsol@gmail.com',
     to: mailID,
     subject,
     text: mailBody

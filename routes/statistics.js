@@ -1,3 +1,6 @@
+/* eslint-disable no-throw-literal */
+/* eslint-disable guard-for-in */
+/* eslint-disable no-restricted-syntax */
 const express = require('express');
 
 const router = express.Router();
@@ -12,16 +15,16 @@ const getTimeInMinutes = timeF => {
   if (timeF == 1) {
     return 15;
   } else if (timeF == 2) {
-    //past hour
+    // past hour
     return 60;
   } else if (timeF == 3) {
-    //today
+    // today
     return "concat(format(@NOWDATE, 'yyyy-MM-dd'), ' 00:00:00.000')";
   } else if (timeF == 4) {
-    //this week
+    // this week
     return "concat(format(@NOWDATE, 'yyyy-MM'), '-', format(DATEADD(dd, -(DATEPART(dw, @NOWDATE)-1), @NOWDATE), 'dd'), ' 00:00:00.000')";
   } else if (timeF == 5) {
-    //this month
+    // this month
     return "concat(format(@NOWDATE, 'yyyy-MM'), '-01 00:00:00.000')";
   }
   return '';
@@ -33,6 +36,7 @@ const awaitHandler = fn => {
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       await fn(req, res, next);
     } catch (err) {
+      console.log(err);
       next(err);
     }
   };
@@ -46,15 +50,14 @@ router.post(
     try {
       console.log('Get density endpoint');
       pool = await poolPromise;
-      let jidds = await pool
+      const jidds = await pool
         .request()
         .query(
-          'select junctionPoint.JID, junctionName from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = ' +
-            req.userID
+          `select junctionPoint.JID, junctionName from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = ${req.userID}`
         );
       const jids = jidds.recordset.map(x => x.JID);
-      let timeF = req.body.timeF;
-      let timeCondition = getTimeInMinutes(timeF);
+      const { timeF } = req.body;
+      const timeCondition = getTimeInMinutes(timeF);
       let result = [];
       if (timeF == 3 || timeF == 4 || timeF == 5) {
         result = await pool.request().query(
@@ -76,27 +79,27 @@ router.post(
         and Upload_Time > @NOWDATE`
         );
       }
-      let parsedObj = {};
+      const parsedObj = {};
       jids.forEach(e => {
         parsedObj[e] = [];
       });
-      let resObj = {};
+      const resObj = {};
       result.recordset.forEach(e => {
         parsedObj[e.UID].push(e.Message);
       });
-      for (let key in parsedObj) {
+      for (const key in parsedObj) {
         if (parsedObj[key] !== undefined && parsedObj[key].length > 0) {
           resObj[key] = findDensity(parsedObj[key]);
         }
       }
-      let formatRes = [];
-      for (let key in resObj) {
-        let temp = {};
+      const formatRes = [];
+      for (const key in resObj) {
+        const temp = {};
         // temp["JID"] = key;
-        temp['intersectionName'] = jidds.recordset.find(e => {
+        temp.intersectionName = jidds.recordset.find(e => {
           return e.JID == key;
-        })['junctionName'];
-        temp['avgDensity'] = resObj[key];
+        }).junctionName;
+        temp.avgDensity = resObj[key];
         formatRes.push(temp);
       }
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -118,8 +121,7 @@ router.post(
       let jidds = await pool
         .request()
         .query(
-          'select junctionPoint.JID from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = ' +
-            req.userID
+          `select junctionPoint.JID from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = ${req.userID}`
         );
       jidds = jidds.recordset.map(x => x.JID);
       const jids = req.body.interID;
@@ -130,9 +132,9 @@ router.post(
       ) {
         throw '203';
       }
-      //timeF - timeframe information is in getTimeInMinutes function
-      let timeF = req.body.timeF;
-      let timeCondition = getTimeInMinutes(timeF);
+      // timeF - timeframe information is in getTimeInMinutes function
+      const { timeF } = req.body;
+      const timeCondition = getTimeInMinutes(timeF);
       let result = [];
       if (timeF == 3 || timeF == 4 || timeF == 5) {
         // set @NOWDATE = DATEADD(HH, +5, GETDATE());
@@ -157,8 +159,8 @@ router.post(
       result = result.recordset.map(e => {
         return { Upload_Time: e.Upload_Time, Message: e.Message };
       });
-      //grpBy use in statisticdHelper page
-      Sendres = findAvgTime(result, req.body.grpBy);
+      // grpBy use in statisticdHelper page
+      let Sendres = findAvgTime(result, req.body.grpBy);
       Sendres = Sendres.map(e => {
         const temp = e.find(x => {
           return x != null;
@@ -194,15 +196,14 @@ router.post(
       let result = await pool
         .request()
         .query(
-          'select junctionPoint.JID, junctionName from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = ' +
-            req.userID
+          `select junctionPoint.JID, junctionName from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = ${req.userID}`
         );
       result = result.recordset.map(x => {
         return { JID: x.JID, name: x.junctionName };
       });
-      let jids = result.map(x => x.JID);
+      const jids = result.map(x => x.JID);
 
-      let activeSatusResult = await pool2.request().query(`
+      const activeSatusResult = await pool2.request().query(`
     WITH cte 
      AS (SELECT UID, 
                 Error_Code,
@@ -216,11 +217,11 @@ router.post(
     WHERE  rn = 1
     ORDER BY UID
     `);
-      let running = [];
-      let warning = [];
-      let error = [];
+      const running = [];
+      const warning = [];
+      const error = [];
       result.forEach(e => {
-        let temp = activeSatusResult.recordset.find(x => {
+        const temp = activeSatusResult.recordset.find(x => {
           return x.UID === e.JID;
         });
         if (temp != undefined) {
@@ -236,7 +237,7 @@ router.post(
         }
       });
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
-      res.send({ running: running, warning: warning, error: error });
+      res.send({ running, warning, error });
     } catch (e) {
       console.log(e);
       res.sendStatus(500).end();

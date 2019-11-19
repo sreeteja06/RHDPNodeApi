@@ -23,6 +23,8 @@ CREATE TABLE tempUser(
   password varchar(300) not null,
   name varchar(50) not null,
   phone bigint not null,
+  verified bit not null DEFAULT 0,
+  OTP int not null
 );
 GO
 

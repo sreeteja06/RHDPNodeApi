@@ -15,6 +15,7 @@ const bcrypt = require('bcryptjs');
 
 const { poolPromise } = require('../db/sql_connect');
 const { authenticate } = require('../middleware/authenticate');
+const mailer = require('../helpers/mail');
 
 const awaitHandler = fn => {
   return async (req, res, next) => {
@@ -22,6 +23,7 @@ const awaitHandler = fn => {
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       await fn(req, res, next);
     } catch (err) {
+      console.log(err);
       next(err);
     }
   };
@@ -44,10 +46,12 @@ router.post('/sendJoinRequest', (req, res) => {
       password = hash;
       try {
         pool = await poolPromise;
+        const OTP = Math.floor(Math.random() * 100000);
+        console.log(`OTP for ${req.body.email} is ${OTP}`);
         let result = await pool
           .request()
           .query(
-            `insert into tempUser (email, password, name, phone) values('${req.body.email}','${password}', '${req.body.name}',${req.body.phone})`
+            `insert into tempUser (email, password, name, phone, OTP) values('${req.body.email}','${password}', '${req.body.name}',${req.body.phone}, ${OTP})`
           );
         result = await pool
           .request()
@@ -55,6 +59,11 @@ router.post('/sendJoinRequest', (req, res) => {
             `select tempUserID from tempUser where email = '${req.body.email}'`
           );
         const { tempUserID } = result.recordset[0];
+        mailer(
+          'OTP for Cyberabad Traffic Analytics suite',
+          `OTP generation: ${OTP} is your otp for registering on Cyberabad Traffic Analytics suite.`,
+          req.body.email
+        );
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.send({ tempUserID, email: req.body.email });
         // eslint-disable-next-line no-shadow
@@ -66,12 +75,41 @@ router.post('/sendJoinRequest', (req, res) => {
   });
 });
 
+router.post(
+  '/verifyTempUser',
+  awaitHandler(async (req, res) => {
+    const pool = await poolPromise;
+    const testResponse = await pool
+      .request()
+      .query(`select * from tempUser where email = '${req.body.email}'`);
+    if (testResponse.recordset.length <= 0) {
+      res.status(409).send({ err: 'no such temp user' });
+    } else if (testResponse.recordset[0].OTP == req.body.OTP) {
+      const response = await pool
+        .request()
+        .query(
+          `update tempUser set verified = 1 where email = '${req.body.email}'`
+        );
+      mailer(
+        'Registration confirmed for Cyberabad Traffic Analytics suite',
+        'Successful OTP: Thanks for registering. We ‘ll notify you soon when the admin grants or declines your access request',
+        testResponse.recordset[0].email
+      );
+      res.send(response);
+    } else {
+      res.status(401).send({ err: 'Wrong OTP' });
+    }
+  })
+);
+
 router.get(
   '/getJoinRequests',
   authenticate,
   awaitHandler(async (req, res) => {
     const pool = await poolPromise;
-    const response = await pool.request().query('select * from tempUser');
+    const response = await pool
+      .request()
+      .query('select * from tempUser where verified = 1');
     console.log(response.recordset);
     res.send(response.recordset);
   })
@@ -81,7 +119,7 @@ router.post(
   '/acceptJoinRequest',
   authenticate,
   awaitHandler(async (req, res) => {
-    if (req.userID == 2) {
+    if (req.userID == 4) {
       const pool = await poolPromise;
       const testResponse = await pool
         .request()
@@ -91,6 +129,11 @@ router.post(
       if (testResponse.recordset.length <= 0) {
         res.status(409).send({ err: 'no such temp user' });
       } else {
+        mailer(
+          'Request accepted for Cyberabad Traffic Analytics suite',
+          'Congratulations! You now have access to the Cyberabad Traffic Analytics suite.',
+          testResponse.recordset[0].email
+        );
         const response = await pool
           .request()
           .query(
@@ -108,7 +151,7 @@ router.delete(
   '/denyJoinRequest',
   authenticate,
   awaitHandler(async (req, res) => {
-    if (req.userID == 2) {
+    if (req.userID == 4) {
       const pool = await poolPromise;
       const testResponse = await pool
         .request()
@@ -118,6 +161,11 @@ router.delete(
       if (testResponse.recordset.length <= 0) {
         res.status(409).send({ err: 'no such temp user' });
       } else {
+        mailer(
+          'Request declined for Cyberabad Traffic Analytics suite',
+          'Apologies! Your request for access to Cyberabad Traffic Analytics suite has been denied by admin.',
+          testResponse.recordset[0].email
+        );
         const response = await pool
           .request()
           .query(

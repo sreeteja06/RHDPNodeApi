@@ -14,6 +14,7 @@ const awaitHandler = fn => {
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       await fn(req, res, next);
     } catch (err) {
+      console.log(err);
       next(err);
     }
   };
