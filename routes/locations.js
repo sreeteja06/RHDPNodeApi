@@ -42,10 +42,12 @@ router.post(
         .request()
         .query(`exec addUserAccess @inUserId = ${req.userID}, @InJID = ${JID}`);
       // change the @inUserId according to the userId of who is admin of the application, because eery juntion point added he can access it
-      if (req.userID != 2) {
+      if (req.userID != process.env.ADMINUID) {
         result = await pool
           .request()
-          .query(`exec addUserAccess @inUserId = 2, @InJID = ${JID}`);
+          .query(
+            `exec addUserAccess @inUserId = ${process.env.ADMINUID}, @InJID = ${JID}`
+          );
       }
       result = await pool
         .request()
@@ -157,7 +159,7 @@ router.post(
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
-    if (req.userID === 2) {
+    if (req.userID === process.env.ADMINUID) {
       try {
         pool = await poolPromise;
         const result = await pool

@@ -109,7 +109,7 @@ router.post(
       });
     } else {
       const OTP = Math.floor(Math.random() * 100000);
-      result = await pool
+      const result = await pool
         .request()
         .query(
           `update tempUser set OTP = ${OTP} where email = '${req.body.email}'`
@@ -163,7 +163,7 @@ router.post(
   '/acceptJoinRequest',
   authenticate,
   awaitHandler(async (req, res) => {
-    if (req.userID == 2) {
+    if (req.userID == process.env.ADMINUID) {
       const pool = await poolPromise;
       const testResponse = await pool
         .request()
@@ -195,7 +195,7 @@ router.delete(
   '/denyJoinRequest',
   authenticate,
   awaitHandler(async (req, res) => {
-    if (req.userID == 2) {
+    if (req.userID == process.env.ADMINUID) {
       const pool = await poolPromise;
       const testResponse = await pool
         .request()

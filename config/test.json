@@ -4,5 +4,5 @@
   "server": "localhost",
   "database": "rhdpTest",
   "jwt_secret": "vbauglbvesv32alwb2ssg1",
-  "EMAILPASS": "rhpd@gmail"
+  "ADMINUID": 4
 }

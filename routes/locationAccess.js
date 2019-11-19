@@ -33,7 +33,7 @@ router.get(
   awaitHandler(async (req, res) => {
     let pool;
     try {
-      if (req.userID == 2) {
+      if (req.userID == process.env.ADMINUID) {
         pool = await poolPromise;
         const jAccess = await pool.request().query(
           `select users.userID, users.name, users.email,jAccess.JID, 
@@ -58,7 +58,7 @@ router.get(
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
-    if (req.userID != 2) {
+    if (req.userID != process.env.ADMINUID) {
       res.status(203).send({ err: 'user unauthorized' });
     } else {
       try {
@@ -108,7 +108,7 @@ router.get(
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
-    if (req.userID != 2) {
+    if (req.userID != process.env.ADMINUID) {
       res.status(203).send({ err: 'user unauthorized' });
     } else {
       try {
@@ -152,7 +152,7 @@ router.post(
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
-    if (req.userID != 2) {
+    if (req.userID != process.env.ADMINUID) {
       res.status(203).send({ err: 'user unauthorized' });
     } else {
       try {
@@ -174,7 +174,7 @@ router.delete(
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
-    if (req.userID != 2) {
+    if (req.userID != process.env.ADMINUID) {
       res.status(203).send({ err: 'user unauthorized' });
     } else {
       try {
@@ -196,7 +196,7 @@ router.delete(
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
-    if (req.userID != 2) {
+    if (req.userID != process.env.ADMINUID) {
       res.status(203).send({ err: 'user unauthorized' });
     } else {
       try {
