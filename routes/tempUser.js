@@ -29,51 +29,95 @@ const awaitHandler = fn => {
   };
 };
 
-router.post('/sendJoinRequest', (req, res) => {
-  let password;
-  let pool;
-  bcrypt.genSalt(10, (err, salt) => {
-    if (err) {
-      console.log(err);
-      res.send(500).send(err);
-    }
-    // eslint-disable-next-line no-shadow
-    bcrypt.hash(req.body.password, salt, async (err, hash) => {
-      if (err) {
-        console.log(err);
-        res.send(500).send(err);
-      }
-      password = hash;
-      try {
-        pool = await poolPromise;
-        const OTP = Math.floor(Math.random() * 100000);
-        console.log(`OTP for ${req.body.email} is ${OTP}`);
-        let result = await pool
-          .request()
-          .query(
-            `insert into tempUser (email, password, name, phone, OTP) values('${req.body.email}','${password}', '${req.body.name}',${req.body.phone}, ${OTP})`
-          );
-        result = await pool
-          .request()
-          .query(
-            `select tempUserID from tempUser where email = '${req.body.email}'`
-          );
-        const { tempUserID } = result.recordset[0];
-        mailer(
-          'OTP for Cyberabad Traffic Analytics suite',
-          `OTP generation: ${OTP} is your otp for registering on Cyberabad Traffic Analytics suite.`,
-          req.body.email
-        );
-        res.setHeader('Content-Type', 'application/json; charset=utf-8');
-        res.send({ tempUserID, email: req.body.email });
+router.post(
+  '/sendJoinRequest',
+  awaitHandler(async (req, res) => {
+    let password;
+    const pool = await poolPromise;
+    const testResponse = await pool
+      .request()
+      .query(`select * from tempUser where email = '${req.body.email}'`);
+    const usersResponse = await pool
+      .request()
+      .query(`select * from users where email = '${req.body.email}'`);
+    if (testResponse.recordset.length > 0) {
+      res.status(409).send({
+        err: 'already tempUser Registered'
+      });
+    } else if (usersResponse.recordset.length > 0) {
+      res.status(409).send({
+        err: 'already user Registered'
+      });
+    } else {
+      bcrypt.genSalt(10, (err, salt) => {
+        if (err) {
+          console.log(err);
+          res.send(500).send(err);
+        }
         // eslint-disable-next-line no-shadow
-      } catch (err) {
-        console.log(err);
-        res.status(500).send(err);
-      }
-    });
-  });
-});
+        bcrypt.hash(req.body.password, salt, async (err, hash) => {
+          if (err) {
+            console.log(err);
+            res.send(500).send(err);
+          }
+          password = hash;
+          try {
+            const OTP = Math.floor(Math.random() * 100000);
+            console.log(`OTP for ${req.body.email} is ${OTP}`);
+            let result = await pool
+              .request()
+              .query(
+                `insert into tempUser (email, password, name, phone, OTP) values('${req.body.email}','${password}', '${req.body.name}',${req.body.phone}, ${OTP})`
+              );
+            result = await pool
+              .request()
+              .query(
+                `select tempUserID from tempUser where email = '${req.body.email}'`
+              );
+            const { tempUserID } = result.recordset[0];
+            mailer(
+              'OTP for Cyberabad Traffic Analytics suite',
+              `OTP generation: ${OTP} is your otp for registering on Cyberabad Traffic Analytics suite.`,
+              req.body.email
+            );
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            res.send({
+              tempUserID,
+              email: req.body.email
+            });
+            // eslint-disable-next-line no-shadow
+          } catch (err) {
+            console.log(err);
+            res.status(500).send(err);
+          }
+        });
+      });
+    }
+  })
+);
+
+router.post(
+  '/reSendOTP',
+  awaitHandler(async (req, res) => {
+    const pool = await poolPromise;
+    const testResponse = await pool
+      .request()
+      .query(`select * from tempUser where email = '${req.body.email}'`);
+    if (testResponse.recordset.length <= 0) {
+      res.status(409).send({
+        err: 'No such user registered'
+      });
+    } else {
+      const OTP = Math.floor(Math.random() * 100000);
+      result = await pool
+        .request()
+        .query(
+          `update tempUser set OTP = ${OTP} where email = '${req.body.email}'`
+        );
+      res.send(result);
+    }
+  })
+);
 
 router.post(
   '/verifyTempUser',
@@ -119,7 +163,7 @@ router.post(
   '/acceptJoinRequest',
   authenticate,
   awaitHandler(async (req, res) => {
-    if (req.userID == 4) {
+    if (req.userID == 2) {
       const pool = await poolPromise;
       const testResponse = await pool
         .request()
@@ -129,17 +173,17 @@ router.post(
       if (testResponse.recordset.length <= 0) {
         res.status(409).send({ err: 'no such temp user' });
       } else {
-        mailer(
-          'Request accepted for Cyberabad Traffic Analytics suite',
-          'Congratulations! You now have access to the Cyberabad Traffic Analytics suite.',
-          testResponse.recordset[0].email
-        );
         const response = await pool
           .request()
           .query(
             `exec acceptUserRequest @inTempUserID = ${req.body.tempUserID}`
           );
         res.send(response);
+        mailer(
+          'Request accepted for Cyberabad Traffic Analytics suite',
+          'Congratulations! You now have access to the Cyberabad Traffic Analytics suite.',
+          testResponse.recordset[0].email
+        );
       }
     } else {
       res.status(203).send({ err: 'user unauthorized' });
@@ -151,7 +195,7 @@ router.delete(
   '/denyJoinRequest',
   authenticate,
   awaitHandler(async (req, res) => {
-    if (req.userID == 4) {
+    if (req.userID == 2) {
       const pool = await poolPromise;
       const testResponse = await pool
         .request()
@@ -161,16 +205,16 @@ router.delete(
       if (testResponse.recordset.length <= 0) {
         res.status(409).send({ err: 'no such temp user' });
       } else {
-        mailer(
-          'Request declined for Cyberabad Traffic Analytics suite',
-          'Apologies! Your request for access to Cyberabad Traffic Analytics suite has been denied by admin.',
-          testResponse.recordset[0].email
-        );
         const response = await pool
           .request()
           .query(
             `delete from tempUser where tempUserID = ${req.body.tempUserID}`
           );
+        mailer(
+          'Request declined for Cyberabad Traffic Analytics suite',
+          'Apologies! Your request for access to Cyberabad Traffic Analytics suite has been denied by admin.',
+          testResponse.recordset[0].email
+        );
         res.send(response);
       }
     } else {
