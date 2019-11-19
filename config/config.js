@@ -1,5 +1,5 @@
 /* eslint-disable global-require */
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || 'production';
 
 if (env === 'test') {
   console.log('running test server');
@@ -9,7 +9,7 @@ if (env === 'test') {
   });
 }
 
-if (env === 'development') {
+if (env === 'production') {
   const config = require('./config.json');
   Object.keys(config).forEach(key => {
     process.env[key] = config[key];
