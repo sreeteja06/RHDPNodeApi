@@ -9,6 +9,7 @@ const { findDensity, findAvgTime } = require('../helpers/statisticsHelper');
 const { authenticate } = require('../middleware/authenticate');
 const { poolPromise } = require('../db/sql_connect');
 const { poolPromise2 } = require('../db/sql_connect2');
+const { redisClient } = require('../helpers/redis');
 
 const getTimeInMinutes = timeF => {
   // past 15 mins
@@ -46,68 +47,77 @@ router.post(
   '/getDensity',
   authenticate,
   awaitHandler(async (req, res) => {
-    let pool;
-    try {
-      console.log('Get density endpoint');
-      pool = await poolPromise;
-      const jidds = await pool
-        .request()
-        .query(
-          `select junctionPoint.JID, junctionName from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = ${req.userID}`
-        );
-      const jids = jidds.recordset.map(x => x.JID);
-      const { timeF } = req.body;
-      const timeCondition = getTimeInMinutes(timeF);
-      let result = [];
-      if (timeF == 3 || timeF == 4 || timeF == 5) {
-        result = await pool.request().query(
-          // set @NOWDATE = DATEADD(HH, +5, GETDATE());
-          `DECLARE @NOWDATE DATETIME;
+    const redisKey = `getDensity${req.body.timeF}`;
+    redisClient.get(redisKey, async (err, redisRes) => {
+      if (err || !redisRes) {
+        console.log('not using redis cache');
+        let pool;
+        try {
+          pool = await poolPromise;
+          const jidds = await pool
+            .request()
+            .query(
+              `select junctionPoint.JID, junctionName from junctionPoint, jAccess where junctionPoint.JID = jAccess.JID and jAccess.UserId = ${req.userID}`
+            );
+          const jids = jidds.recordset.map(x => x.JID);
+          const { timeF } = req.body;
+          const timeCondition = getTimeInMinutes(timeF);
+          let result = [];
+          if (timeF == 3 || timeF == 4 || timeF == 5) {
+            result = await pool.request().query(
+              // set @NOWDATE = DATEADD(HH, +5, GETDATE());
+              `DECLARE @NOWDATE DATETIME;
         set @NOWDATE = DATEADD(HH, +5, CONVERT(datetime, '06-09-2019  6:00:00 PM'));
         set @NOWDATE = DATEADD(n, +30, @NOWDATE);
         select * from LogDelhi where UID in (${jids.toString()}) 
         and Upload_Time > ${timeCondition}`
-        );
-      } else {
-        // set @NOWDATE = DATEADD(HH, +5, GETDATE());
-        result = await pool.request().query(
-          `DECLARE @NOWDATE DATETIME;
+            );
+          } else {
+            // set @NOWDATE = DATEADD(HH, +5, GETDATE());
+            result = await pool.request().query(
+              `DECLARE @NOWDATE DATETIME;
         set @NOWDATE = DATEADD(HH, +5, CONVERT(datetime, '06-09-2019  6:00:00 PM'));
         set @NOWDATE = DATEADD(n, +30, @NOWDATE);
         set @NOWDATE = DATEADD(mi, -${timeCondition}, @NOWDATE);
         select * from LogDelhi where UID in (${jids.toString()}) 
         and Upload_Time > @NOWDATE`
-        );
-      }
-      const parsedObj = {};
-      jids.forEach(e => {
-        parsedObj[e] = [];
-      });
-      const resObj = {};
-      result.recordset.forEach(e => {
-        parsedObj[e.UID].push(e.Message);
-      });
-      for (const key in parsedObj) {
-        if (parsedObj[key] !== undefined && parsedObj[key].length > 0) {
-          resObj[key] = findDensity(parsedObj[key]);
+            );
+          }
+          const parsedObj = {};
+          jids.forEach(e => {
+            parsedObj[e] = [];
+          });
+          const resObj = {};
+          result.recordset.forEach(e => {
+            parsedObj[e.UID].push(e.Message);
+          });
+          for (const key in parsedObj) {
+            if (parsedObj[key] !== undefined && parsedObj[key].length > 0) {
+              resObj[key] = findDensity(parsedObj[key]);
+            }
+          }
+          const formatRes = [];
+          for (const key in resObj) {
+            const temp = {};
+            // temp["JID"] = key;
+            temp.intersectionName = jidds.recordset.find(e => {
+              return e.JID == key;
+            }).junctionName;
+            temp.avgDensity = resObj[key];
+            formatRes.push(temp);
+          }
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          redisClient.set(redisKey, JSON.stringify(formatRes), 'EX', 300);
+          res.send(formatRes);
+        } catch (e) {
+          console.log(e);
+          res.sendStatus(500).end();
         }
+      } else {
+        console.log('using redis cache');
+        res.send(JSON.parse(redisRes));
       }
-      const formatRes = [];
-      for (const key in resObj) {
-        const temp = {};
-        // temp["JID"] = key;
-        temp.intersectionName = jidds.recordset.find(e => {
-          return e.JID == key;
-        }).junctionName;
-        temp.avgDensity = resObj[key];
-        formatRes.push(temp);
-      }
-      res.setHeader('Content-Type', 'application/json; charset=utf-8');
-      res.send(formatRes);
-    } catch (e) {
-      console.log(e);
-      res.sendStatus(500).end();
-    }
+    });
   })
 );
 

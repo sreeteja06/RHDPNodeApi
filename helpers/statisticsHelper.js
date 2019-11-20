@@ -105,7 +105,8 @@ const findAvgTime = (resArr, grpBy) => {
   }
   const length = new Array(n).fill(0);
   let res = new Array(n).fill(0);
-  res = res.map(() => {
+  // eslint-disable-next-line no-unused-vars
+  res = res.map(e => {
     return new Array(numPhase).fill(0);
   });
   parsedArr.forEach(e => {
