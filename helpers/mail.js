@@ -9,8 +9,10 @@
 
  */
 const nodemailer = require('nodemailer');
+const path = require('path');
+const fs = require('fs');
 
-const sendMail = (subject, mailBody, mailID) => {
+const sendMail = (subject, mailBody, mailID, attachment = null) => {
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
@@ -21,19 +23,59 @@ const sendMail = (subject, mailBody, mailID) => {
       pass: process.env.EMAILPASS // Your password
     }
   });
-
-  const mailOptions = {
-    from: 'rhpdsoftsol@gmail.com',
-    to: mailID,
-    subject,
-    text: mailBody
-  };
+  let mailOptions;
+  if (!attachment) {
+    mailOptions = {
+      from: 'RHPD Traffic Analytics Suite <rhpdsoftsol@gmail.com>',
+      to: mailID,
+      subject,
+      text: mailBody
+    };
+  } else {
+    console.log('sending attachment');
+    mailOptions = {
+      from: 'RHPD Traffic Analytics Suite <rhpdsoftsol@gmail.com>',
+      to: mailID,
+      subject,
+      text: mailBody,
+      attachments: [
+        {
+          filename: 'reports.pdf',
+          path: path.join(
+            __dirname,
+            '../',
+            'assets',
+            `${attachment.filename}.pdf`
+          )
+        }
+      ]
+    };
+  }
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.log(error);
     } else {
       console.log(`Email sent: ${info.response}`);
+      if (attachment) {
+        fs.access(
+          path.join(__dirname, '../', 'assets', `${attachment.filename}.pdf`),
+          err => {
+            if (!err) {
+              fs.unlinkSync(
+                path.join(
+                  __dirname,
+                  '../',
+                  'assets',
+                  `${attachment.filename}.pdf`
+                )
+              );
+            } else {
+              console.log(err);
+            }
+          }
+        );
+      }
     }
   });
 };

@@ -26,8 +26,10 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
+    "ejs": "^2.7.4",
     "express": "^4.16.4",
     "helmet": "^3.21.2",
+    "html-pdf": "^2.2.0",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.9.1",
     "mssql": "^5.0.3",
@@ -53,7 +55,7 @@
     ],
     "delay": "2500",
     "env": {
-      "NODE_ENV": "test",
+      "NODE_ENV": "production",
       "NODE_CONFIG_DIR": "./config"
     }
   }

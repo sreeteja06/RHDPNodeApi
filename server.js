@@ -11,6 +11,7 @@ const locationRoute = require('./routes/locations');
 const statisticsRoute = require('./routes/statistics');
 const locationAccessRoute = require('./routes/locationAccess');
 const tempUserRoute = require('./routes/tempUser');
+const reportRoute = require('./routes/report');
 
 const app = express();
 app.use(cors());
@@ -23,7 +24,9 @@ app.use('/user', userRoute);
 app.use('/', locationRoute);
 app.use('/', locationAccessRoute);
 app.use('/', tempUserRoute);
+app.use('/', reportRoute);
 app.use('/statistics', statisticsRoute);
+app.set('view engine', 'ejs');
 const port = process.env.PORT || 1337;
 
 app.get('/', (req, res) => {

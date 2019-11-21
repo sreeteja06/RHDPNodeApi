@@ -1,0 +1,131 @@
+<!--
+SPDX-License-Identifier: Apache-2.0
+        _____________  ___  
+       / ___/ ___/ _ \/ _ \ 
+     (__  ) /  /  __/  __/ 
+    /____/_/   \___/\___  
+File Created: Thursday, 21st November 2019 9:29:44 am
+Author: SreeTeja06 (sreeteja.muthyala@gmail.com)
+
+-->
+<html>
+
+<head>
+  <title>BillBook</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <style>
+    #billbook {
+      height: 845px;
+      width: 595px;
+      background-repeat: no-repeat;
+      background-size: 595px 845px;
+      border: 1px solid red;
+      /*margin:0px auto;*/
+      margin: 0px !important;
+    }
+
+    table {
+      width: 92% !important;
+
+      margin: 0px auto;
+      color: #7f7f7f;
+      border-radius: 0px 0px 6px 6px;
+      -moz-border-radius: 6px 6px 6px 6px;
+      -webkit-border-radius: 6px 6px 6px 6px;
+      border-width: 0.5px !important;
+      border-style: solid !important;
+      border-color: #f3f3f3 !important;
+    }
+
+    tr {
+      border: 1px solid #f3f3f3;
+    }
+
+    td {
+      border: 1px solid #f3f3f3;
+      padding: 5px 0px 5px 6px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+  <!--<img src="../images/final.jpg" width="595" height="842" alt="">-->
+  <section id="billbook">
+    <table style=" margin-top: 175px !important;">
+      <tr>
+        <td width="59%" style="padding-left:7px;">Name :<span><%= details.fname + " " +details.lname; %></span></td>
+        <td class="text-center">INVOICE</td>
+      </tr>
+      <tr>
+        <td>Address :<%= details.address %></td>
+        <td>GSTIN : <span style="padding-left:40px;">547etbdjh787jfh</span></td>
+      </tr>
+
+      <tr>
+        <td></td>
+        <td>Invoice No :</td>
+      </tr>
+
+      <tr>
+        <td>Phone Number :<%= details.phone%></td>
+        <td>Invoice Date :</td>
+      </tr>
+
+    </table>
+
+    <table style="margin-top:11px;">
+      <tr class="text-center">
+        <td width="6.5%">SNo</td>
+        <td width="39.5%">Description</td>
+        <td width="13%">HSN</td>
+        <td width="9.5%">Qty</td>
+        <td width="15.5%">Rate</td>
+        <td width="16%">Amount</td>
+      </tr>
+
+      <tr style="height:242px">
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+
+      <tr>
+        <td colspan="3" rowspan="2">Rupees In Words : yrtyrtyrty ryrty rty rtyrtyrty ryrty</td>
+        <td colspan="2" class="text-center">Taxable Value :</td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr>
+        <td colspan="2" style="padding-left:30px;">SGST................%</td>
+        <!--<td></td>-->
+        <td>&nbsp;</td>
+      </tr>
+
+      <tr>
+        <td colspan="3" rowspan="3">Terms and Conditions:</td>
+        <td colspan="2" style="padding-left:30px;">SGST................%</td>
+        <!--<td></td>-->
+        <td>&nbsp;</td>
+      </tr>
+
+      <tr>
+        <td colspan="2" style="padding-left:30px;">SGST................%</td>
+        <!--<td></td>-->
+        <td>&nbsp;</td>
+      </tr>
+
+      <tr>
+        <td colspan="2" style="padding-left:30px;">Grand Total</td>
+        <!--<td></td>-->
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+  </section>
+</body>
+</html>
