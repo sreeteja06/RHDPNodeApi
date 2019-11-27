@@ -159,7 +159,7 @@ router.post(
   authenticate,
   awaitHandler(async (req, res) => {
     let pool;
-    if (req.userID === process.env.ADMINUID) {
+    if (req.userID == process.env.ADMINUID) {
       try {
         pool = await poolPromise;
         const result = await pool

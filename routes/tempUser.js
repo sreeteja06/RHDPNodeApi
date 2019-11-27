@@ -155,14 +155,18 @@ router.get(
   '/getJoinRequests',
   authenticate,
   awaitHandler(async (req, res) => {
-    const pool = await poolPromise;
-    const response = await pool
-      .request()
-      .query(
-        'select tempUserID, email, name, phone from tempUser where verified = 1'
-      );
-    console.log(response.recordset);
-    res.send(response.recordset);
+    if (req.userID == process.env.ADMINUID) {
+      const pool = await poolPromise;
+      const response = await pool
+        .request()
+        .query(
+          'select tempUserID, email, name, phone from tempUser where verified = 1'
+        );
+      console.log(response.recordset);
+      res.send(response.recordset);
+    } else {
+      res.status(203).send({ err: 'user unauthorized' });
+    }
   })
 );
 

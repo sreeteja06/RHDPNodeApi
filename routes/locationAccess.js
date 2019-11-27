@@ -191,7 +191,7 @@ router.delete(
   })
 );
 
-router.delete(
+router.post(
   '/removeLocationAccess',
   authenticate,
   awaitHandler(async (req, res) => {
@@ -204,7 +204,7 @@ router.delete(
         const response = await pool
           .request()
           .query(
-            `DELETE from jAccess where JID = ${req.body.JID} and UserId = ${req.userID}`
+            `DELETE from jAccess where JID = ${req.body.JID} and UserId = ${req.body.userID}`
           );
         res.send(response);
       } catch (e) {
