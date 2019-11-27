@@ -70,7 +70,7 @@ router.get(
         END AS access, JP.junctionName, JP.city, JP.JID
         FROM jAccess as JA 
         RIGHT JOIN junctionPoint as JP 
-        ON JA.JID = JP.JID and JA.UserId = ${req.body.userID}`);
+        ON JA.JID = JP.JID and JA.UserId = ${req.query.userID}`);
         res.send(requests.recordset);
       } catch (e) {
         console.log(e);

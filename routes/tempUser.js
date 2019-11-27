@@ -114,6 +114,11 @@ router.post(
         .query(
           `update tempUser set OTP = ${OTP} where email = '${req.body.email}'`
         );
+      mailer(
+        'OTP for Cyberabad Traffic Analytics suite',
+        `OTP generation: ${OTP} is your otp for registering on Cyberabad Traffic Analytics suite.`,
+        req.body.email
+      );
       res.send(result);
     }
   })
@@ -153,7 +158,9 @@ router.get(
     const pool = await poolPromise;
     const response = await pool
       .request()
-      .query('select * from tempUser where verified = 1');
+      .query(
+        'select tempUserID, email, name, phone from tempUser where verified = 1'
+      );
     console.log(response.recordset);
     res.send(response.recordset);
   })
@@ -191,7 +198,7 @@ router.post(
   })
 );
 
-router.delete(
+router.post(
   '/denyJoinRequest',
   authenticate,
   awaitHandler(async (req, res) => {
