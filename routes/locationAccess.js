@@ -14,6 +14,7 @@ const router = express.Router();
 
 const { poolPromise } = require('../db/sql_connect');
 const { authenticate } = require('../middleware/authenticate');
+const slackBot = require('../helpers/slackBot');
 
 const awaitHandler = fn => {
   return async (req, res, next) => {
@@ -22,6 +23,7 @@ const awaitHandler = fn => {
       await fn(req, res, next);
     } catch (err) {
       console.log(err);
+      slackBot(`${err.message} ${err.stack}`);
       next(err);
     }
   };
@@ -48,6 +50,7 @@ router.get(
       }
     } catch (e) {
       console.log(e);
+      slackBot(`${e.message} ${e.stack}`);
       res.status(500).end(e);
     }
   })
@@ -74,6 +77,7 @@ router.get(
         res.send(requests.recordset);
       } catch (e) {
         console.log(e);
+        slackBot(`${e.message} ${e.stack}`);
         res.status(500).end(e);
       }
     }
@@ -98,6 +102,7 @@ router.get(
       res.send(requests.recordset);
     } catch (e) {
       console.log(e);
+      slackBot(`${e.message} ${e.stack}`);
       res.status(500).end(e);
     }
   })
@@ -121,6 +126,7 @@ router.get(
         res.send(requests.recordset);
       } catch (e) {
         console.log(e);
+        slackBot(`${e.message} ${e.stack}`);
         res.status(500).end(e);
       }
     }
@@ -142,6 +148,7 @@ router.post(
       res.send(requests);
     } catch (e) {
       console.log(e);
+      slackBot(`${e.message} ${e.stack}`);
       res.status(500).end(e);
     }
   })
@@ -163,6 +170,7 @@ router.post(
         res.send(response);
       } catch (e) {
         console.log(e);
+        slackBot(`${e.message} ${e.stack}`);
         res.status(500).end(e);
       }
     }
@@ -185,6 +193,7 @@ router.delete(
         res.send(response);
       } catch (e) {
         console.log(e);
+        slackBot(`${e.message} ${e.stack}`);
         res.status(500).end(e);
       }
     }
@@ -209,6 +218,7 @@ router.post(
         res.send(response);
       } catch (e) {
         console.log(e);
+        slackBot(`${e.message} ${e.stack}`);
         res.status(500).end(e);
       }
     }

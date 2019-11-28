@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const { poolPromise } = require('../db/sql_connect');
 const { generateAuthToken, decodeAuthToken } = require('../helpers/authToken');
 const { authenticate } = require('../middleware/authenticate');
+const slackBot = require('../helpers/slackBot');
 
 const awaitHandler = fn => {
   return async (req, res, next) => {
@@ -14,6 +15,7 @@ const awaitHandler = fn => {
       await fn(req, res, next);
     } catch (err) {
       console.log(err);
+      slackBot(`${err.message} ${err.stack}`);
       next(err);
     }
   };
@@ -33,12 +35,14 @@ router.post('/signUp', (req, res) => {
   bcrypt.genSalt(10, (err, salt) => {
     if (err) {
       console.log(err);
+      slackBot(`${err.message} ${err.stack}`);
       res.send(500).send(err);
     }
     // eslint-disable-next-line no-shadow
     bcrypt.hash(req.body.password, salt, async (err, hash) => {
       if (err) {
         console.log(err);
+        slackBot(`${err.message} ${err.stack}`);
         res.send(500).send(err);
       }
       password = hash;
@@ -66,11 +70,29 @@ router.post('/signUp', (req, res) => {
         // eslint-disable-next-line no-shadow
       } catch (err) {
         console.log(err);
+        slackBot(`${err.message} ${err.stack}`);
         res.status(500).send(err);
       }
     });
   });
 });
+
+router.get(
+  '/getAllUsers',
+  authenticate,
+  awaitHandler(async (req, res) => {
+    if (req.userID == process.env.ADMINUID) {
+      const pool = await poolPromise;
+      const response = await pool
+        .request()
+        .query('select userID, email, name, phone from users');
+      console.log(response.recordset);
+      res.send(response.recordset);
+    } else {
+      res.status(203).send({ err: 'user unauthorized' });
+    }
+  })
+);
 
 /** *
  * @description this api endpoint is used for login
@@ -149,6 +171,7 @@ router.post(
         res.status(401).send({ err: 'no email found' });
       } else {
         console.log(err);
+        slackBot(`${err.message} ${err.stack}`);
         res.status(500).end();
       }
     }
@@ -173,6 +196,7 @@ router.delete(
       res.send(result);
     } catch (e) {
       console.log(e);
+      slackBot(`${e.message} ${e.stack}`);
       res.status(500).send(e);
     }
   })

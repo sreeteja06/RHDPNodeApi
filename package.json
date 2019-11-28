@@ -33,6 +33,7 @@
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.9.1",
     "mssql": "^5.0.3",
+    "node-slack": "0.0.7",
     "nodemailer": "^6.3.1",
     "pm2": "^4.1.2"
   },

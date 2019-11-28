@@ -16,6 +16,7 @@ const bcrypt = require('bcryptjs');
 const { poolPromise } = require('../db/sql_connect');
 const { authenticate } = require('../middleware/authenticate');
 const mailer = require('../helpers/mail');
+const slackBot = require('../helpers/slackBot');
 
 const awaitHandler = fn => {
   return async (req, res, next) => {
@@ -24,6 +25,7 @@ const awaitHandler = fn => {
       await fn(req, res, next);
     } catch (err) {
       console.log(err);
+      slackBot(`${err.message} ${err.stack}`);
       next(err);
     }
   };
@@ -52,12 +54,14 @@ router.post(
       bcrypt.genSalt(10, (err, salt) => {
         if (err) {
           console.log(err);
+          slackBot(`${err.message} ${err.stack}`);
           res.send(500).send(err);
         }
         // eslint-disable-next-line no-shadow
         bcrypt.hash(req.body.password, salt, async (err, hash) => {
           if (err) {
             console.log(err);
+            slackBot(`${err.message} ${err.stack}`);
             res.send(500).send(err);
           }
           password = hash;
@@ -80,6 +84,12 @@ router.post(
               `OTP generation: ${OTP} is your otp for registering on Cyberabad Traffic Analytics suite.`,
               req.body.email
             );
+            mailer(
+              'New Join Request for Cyberabad Traffic Analytics suite',
+              `There is a new request to access Cyberabad Traffic Analytics suite.
+              The details are email: ${req.body.email} \n ${req.body.name}`,
+              'raghav_dave93@outlook.com'
+            );
             res.setHeader('Content-Type', 'application/json; charset=utf-8');
             res.send({
               tempUserID,
@@ -88,6 +98,7 @@ router.post(
             // eslint-disable-next-line no-shadow
           } catch (err) {
             console.log(err);
+            slackBot(`${err.message} ${err.stack}`);
             res.status(500).send(err);
           }
         });

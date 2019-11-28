@@ -15,6 +15,7 @@ const pdf = require('html-pdf');
 const fs = require('fs');
 const path = require('path');
 const mailer = require('../helpers/mail');
+const slackBot = require('../helpers/slackBot');
 
 router.post('/sendReportsEmail', async (req, res) => {
   try {
@@ -29,6 +30,7 @@ router.post('/sendReportsEmail', async (req, res) => {
         async (err, result) => {
           if (err) {
             console.log(err);
+            slackBot(`${err.message} ${err.stack}`);
             res.status(500).send({ err: 'error creating pdf' });
           } else {
             console.log(result);
@@ -50,6 +52,7 @@ router.post('/sendReportsEmail', async (req, res) => {
       );
   } catch (e) {
     console.log(e);
+    slackBot(`${e.message} ${e.stack}`);
     res.sendStatus(500).send(e);
   }
 });
@@ -66,6 +69,7 @@ router.post('/dynamicHtml', async (req, res) => {
   res.render('crm.ejs', { details }, (err, html) => {
     if (err) {
       console.log(err);
+      slackBot(`${err.message} ${err.stack}`);
       res.status(500).send({ err: 'unable to render template' });
     } else {
       const filename = Math.floor(Math.random() * 10000);

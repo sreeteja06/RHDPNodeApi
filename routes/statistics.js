@@ -9,6 +9,7 @@ const { findDensity, findAvgTime } = require('../helpers/statisticsHelper');
 const { authenticate } = require('../middleware/authenticate');
 const { poolPromise } = require('../db/sql_connect');
 const { poolPromise2 } = require('../db/sql_connect2');
+const slackBot = require('../helpers/slackBot');
 
 const getTimeInMinutes = timeF => {
   // past 15 mins
@@ -37,6 +38,7 @@ const awaitHandler = fn => {
       await fn(req, res, next);
     } catch (err) {
       console.log(err);
+      slackBot(`${err.message} ${err.stack}`);
       next(err);
     }
   };
@@ -106,6 +108,7 @@ router.post(
       res.send(formatRes);
     } catch (e) {
       console.log(e);
+      slackBot(`${e.message} ${e.stack}`);
       res.sendStatus(500).end();
     }
   })
@@ -178,6 +181,7 @@ router.post(
       if (e == 203) {
         res.sendStatus(203).send({ err: 'unauthorized Junction ID' });
       } else {
+        slackBot(`${e.message} ${e.stack}`);
         res.sendStatus(500).end();
       }
     }
@@ -240,6 +244,7 @@ router.post(
       res.send({ running, warning, error });
     } catch (e) {
       console.log(e);
+      slackBot(`${e.message} ${e.stack}`);
       res.sendStatus(500).end();
     }
   })

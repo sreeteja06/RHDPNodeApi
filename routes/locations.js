@@ -7,6 +7,7 @@ const { poolPromise2 } = require('../db/sql_connect2');
 const { authenticate } = require('../middleware/authenticate');
 const { centerGeolocation } = require('../helpers/center_geolocation');
 const { timer } = require('../helpers/timerpage');
+const slackBot = require('../helpers/slackBot');
 
 const awaitHandler = fn => {
   return async (req, res, next) => {
@@ -15,6 +16,7 @@ const awaitHandler = fn => {
       await fn(req, res, next);
     } catch (err) {
       console.log(err);
+      slackBot(`${err.message} ${err.stack}`);
       next(err);
     }
   };
@@ -56,6 +58,7 @@ router.post(
       res.send(result.recordset[0]);
     } catch (e) {
       console.log(e);
+      slackBot(`${e.message} ${e.stack}`);
       res.status(500).send(e);
     }
   })
@@ -80,6 +83,7 @@ router.get(
       res.send(jids);
     } catch (e) {
       console.log(e);
+      slackBot(`${e.message} ${e.stack}`);
       res.sendStatus(500).send(e);
     }
   })
@@ -97,6 +101,7 @@ router.get(
       res.send(response.recordset);
     } catch (e) {
       console.log(e);
+      slackBot(`${e.message} ${e.stack}`);
       res.status(500).send(e);
     }
   })
@@ -149,6 +154,7 @@ router.get(
       res.send({ centerPoints, doc: result.recordset });
     } catch (e) {
       console.log(e);
+      slackBot(`${e.message} ${e.stack}`);
       res.status(500).send(e);
     }
   })
@@ -171,6 +177,7 @@ router.post(
         res.send(result);
       } catch (e) {
         console.log(e);
+        slackBot(`${e.message} ${e.stack}`);
         res.status(500).send(e);
       }
     } else {
@@ -228,6 +235,7 @@ router.post(
           .status(503)
           .send({ err: 'less than three packets in trafficinfopage table' });
       } else {
+        slackBot(`${e.message} ${e.stack}`);
         res.sendStatus(500).end();
       }
     }
