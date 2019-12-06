@@ -22,31 +22,3 @@ module.exports = message => {
     icon_emoji: ':japanese_ogre:'
   });
 };
-// module.exports = message => {
-//   console.log(process.env.SLACKWEBHOOK);
-//   const options = {
-//     method: 'POST',
-//     url:
-//       'https://hooks.slack.com/services/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',
-//     headers: {
-//       'cache-control': 'no-cache',
-//       Connection: 'keep-alive',
-//       'Content-Length': '277',
-//       'Accept-Encoding': 'gzip, deflate',
-//       Host: 'hooks.slack.com',
-//       'Cache-Control': 'no-cache',
-//       Accept: '*/*',
-//       'Content-Type': 'application/x-www-form-urlencoded'
-//     },
-//     form: {
-//       payload: `{"channel": "#deploy500events", "username": "webhookbot", "text": "${message}", "icon_emoji": ":japanese_ogre:"}`
-//     }
-//   };
-//   // eslint-disable-next-line no-unused-vars
-//   request(options, (error, response, body) => {
-//     console.log('request');
-//     if (error) {
-//       console.log(error);
-//     }
-//   });
-// };
