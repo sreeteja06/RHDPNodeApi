@@ -13,7 +13,7 @@ const locationAccessRoute = require('./routes/locationAccess');
 const tempUserRoute = require('./routes/tempUser');
 const reportRoute = require('./routes/report');
 
-require('./helpers/anomaly');
+require('./helpers/anomalyData');
 
 const app = express();
 app.use(cors());
