@@ -1,5 +1,5 @@
 /* eslint-disable global-require */
-const env = process.env.NODE_ENV || 'test';
+const env = process.env.NODE_ENV || 'production';
 
 if (env === 'test') {
   console.log('running test server');

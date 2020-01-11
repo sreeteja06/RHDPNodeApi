@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/sreeteja06/RHDPNodeApi#readme",
   "dependencies": {
+    "@google/maps": "^1.0.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
